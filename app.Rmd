@@ -91,7 +91,13 @@ Conta com **pesquisadores** da <a href = https://www.ufes.br target = _blank> Un
 
 #### Os dados
 
-São providos do DATASUS do Ministério da Saúde e formam um grande banco anual composto por todos os registros das declarações de óbitos a partir do ano de 1996. Nessa plataforma, os dados do SIM são previamente tratados pela PCDaS com base no fluxo ETL (_Extract_, _Transform_ e _Load_). Atualmente, a PCDaS disponibiliza dados do SIM até 2022, **sendo estes e os de 2021 preliminares**, atualizados em 25 de novembro de 2022. Além disso, o download dos códigos em R utilizados para a obtenção das bases de dados utilizadas neste painel pode ser realizado através <a href = https://drive.google.com/drive/folders/1egJZLAsbsKnEzmDYp2t2dcN3FPTkmdnq?usp=sharing target = _blank> deste link </a>.
+São providos do DATASUS do Ministério da Saúde e formam um grande banco anual composto por todos os registros das declarações de óbitos a partir do ano de 1996. Nessa plataforma, os dados do SIM são previamente tratados pela PCDaS com base no fluxo ETL (_Extract_, _Transform_ e _Load_). Atualmente, a PCDaS disponibiliza dados do SIM até 2022, **sendo estes e os de 2021 preliminares**, atualizados em 05 de janeiro de 2023. Os dados podem ser acessados em: Herzog, R. S.; Francisco, R. P. V.; Rodrigues, A. S.  Óbitos de gestantes e puérperas [banco de dados], 2022, Observatório Obstétrico Brasileiro (OOBr). Disponível em DOI: https://doi.org/10.7303/syn42902915.
+
+<br>
+
+#### Como citar esse painel
+
+Observatório Obstétrico Brasileiro. OOBr Óbitos de Gestantes e Puérperas, 2022. Disponível em  https://observatorioobstetrico.shinyapps.io/obitos-grav-puerp. DOI: https://doi.org/10.7303/syn44144271.
 
 <br>
 
@@ -102,6 +108,7 @@ Para comentários, sugestões e colaborações científicas, por favor, envie me
 ```{r logos, echo = FALSE, fig.align ='center', out.width="100%"}
 knitr::include_graphics("www/print-or-cinza.png")
 ```
+
 
 
 
@@ -255,11 +262,11 @@ dados_om_filtrados <- reactive({
         filter(ano == input$selectAnoOM,
                tipo_de_morte_materna %in% input$selectCausasOM,
                periodo_do_obito %in% input$selectPeriodoOM,
-               investigacao %in% input$selectInvestigacaoOM,
+               investigacao_cmm %in% input$selectInvestigacaoOM,
                racacor %in% input$selectRacaOM,
                idade >= input$selectIdadeOM[1] & idade <= input$selectIdadeOM[2]) |>
         mutate(regiao = "Todas") |>
-        group_by(ano, regiao, capitulo_cid10, categoria_cid10, tipo_de_morte_materna, periodo_do_obito, racacor, investigacao) |>
+        group_by(ano, regiao, capitulo_cid10, categoria_cid10, tipo_de_morte_materna, periodo_do_obito, racacor, investigacao_cmm) |>
         summarise(obitos = sum(as.numeric(obitos))) |>
         ungroup()
     } else {
@@ -268,10 +275,10 @@ dados_om_filtrados <- reactive({
                regiao %in% input$selectRegiaoOM,
                tipo_de_morte_materna %in% input$selectCausasOM,
                periodo_do_obito %in% input$selectPeriodoOM,
-               investigacao %in% input$selectInvestigacaoOM,
+               investigacao_cmm %in% input$selectInvestigacaoOM,
                racacor %in% input$selectRacaOM,
                idade >= input$selectIdadeOM[1] & idade <= input$selectIdadeOM[2]) |>
-        group_by(regiao, ano, capitulo_cid10, categoria_cid10, tipo_de_morte_materna, periodo_do_obito, racacor, investigacao) |>
+        group_by(regiao, ano, capitulo_cid10, categoria_cid10, tipo_de_morte_materna, periodo_do_obito, racacor, investigacao_cmm) |>
         summarise(obitos = sum(as.numeric(obitos))) |>
         ungroup()
     }
@@ -281,10 +288,10 @@ dados_om_filtrados <- reactive({
              uf == input$selectEstadoOM,
              tipo_de_morte_materna %in% input$selectCausasOM,
              periodo_do_obito %in% input$selectPeriodoOM,
-             investigacao %in% input$selectInvestigacaoOM,
+             investigacao_cmm %in% input$selectInvestigacaoOM,
              racacor %in% input$selectRacaOM,
              idade >= input$selectIdadeOM[1] & idade <= input$selectIdadeOM[2]) |>
-      group_by(uf, regiao, ano, capitulo_cid10, categoria_cid10, tipo_de_morte_materna, periodo_do_obito, racacor, investigacao) |>
+      group_by(uf, regiao, ano, capitulo_cid10, categoria_cid10, tipo_de_morte_materna, periodo_do_obito, racacor, investigacao_cmm) |>
       summarise(obitos = sum(as.numeric(obitos))) |>
       ungroup() 
   } else {
@@ -293,10 +300,10 @@ dados_om_filtrados <- reactive({
              municipio == input$selectMunicipioOM,
              tipo_de_morte_materna %in% input$selectCausasOM,
              periodo_do_obito %in% input$selectPeriodoOM,
-             investigacao %in% input$selectInvestigacaoOM,
+             investigacao_cmm %in% input$selectInvestigacaoOM,
              racacor %in% input$selectRacaOM,
              idade >= input$selectIdadeOM[1] & idade <= input$selectIdadeOM[2]) |>
-      group_by(municipio, uf, regiao, ano, capitulo_cid10, categoria_cid10, tipo_de_morte_materna, periodo_do_obito, racacor, investigacao) |>
+      group_by(municipio, uf, regiao, ano, capitulo_cid10, categoria_cid10, tipo_de_morte_materna, periodo_do_obito, racacor, investigacao_cmm) |>
       summarise(obitos = sum(as.numeric(obitos))) |>
       ungroup()
   }
@@ -393,7 +400,7 @@ renderReactable(
           aggregate = JS("function() { return ''}"),
           format = list(aggregated = colFormat(prefix = "Todas"))
         ),
-        investigacao = colDef(
+        investigacao_cmm = colDef(
           name = "Investigação por CMM",
           aggregate = JS("function() { return ''}"),
           format = list(aggregated = colFormat(prefix = "Todas as categorias"))
@@ -529,11 +536,11 @@ dados_onm_filtrados <- reactive({
       dados_obitos_desconsiderados_ext() |>
         filter(ano == input$selectAnoONM,
                periodo_do_obito %in% input$selectPeriodoONM,
-               investigacao %in% input$selectInvestigacaoONM,
+               investigacao_cmm %in% input$selectInvestigacaoONM,
                racacor %in% input$selectRacaONM,
                idade >= input$selectIdadeONM[1] & idade <= input$selectIdadeONM[2]) |>
         mutate(regiao = "Todas") |>
-        group_by(ano, regiao, capitulo_cid10, categoria_cid10, periodo_do_obito, racacor, investigacao) |>
+        group_by(ano, regiao, capitulo_cid10, categoria_cid10, periodo_do_obito, racacor, investigacao_cmm) |>
         summarise(obitos = sum(as.numeric(obitos))) |>
         ungroup()      
     } else {
@@ -541,10 +548,10 @@ dados_onm_filtrados <- reactive({
         filter(ano == input$selectAnoONM,
                regiao %in% input$selectRegiaoONM,
                periodo_do_obito %in% input$selectPeriodoONM,
-               investigacao %in% input$selectInvestigacaoONM,
+               investigacao_cmm %in% input$selectInvestigacaoONM,
                racacor %in% input$selectRacaONM,
                idade >= input$selectIdadeONM[1] & idade <= input$selectIdadeONM[2]) |>
-        group_by(ano, regiao, capitulo_cid10, categoria_cid10, periodo_do_obito, racacor, investigacao) |>
+        group_by(ano, regiao, capitulo_cid10, categoria_cid10, periodo_do_obito, racacor, investigacao_cmm) |>
         summarise(obitos = sum(as.numeric(obitos))) |>
         ungroup()     
     }
@@ -554,10 +561,10 @@ dados_onm_filtrados <- reactive({
       filter(ano == input$selectAnoONM,
              uf == input$selectEstadoONM,
              periodo_do_obito %in% input$selectPeriodoONM,
-             investigacao %in% input$selectInvestigacaoONM,
+             investigacao_cmm %in% input$selectInvestigacaoONM,
              racacor %in% input$selectRacaONM,
              idade >= input$selectIdadeONM[1] & idade <= input$selectIdadeONM[2]) |>
-      group_by(ano, uf, regiao, capitulo_cid10, categoria_cid10, periodo_do_obito, racacor, investigacao) |>
+      group_by(ano, uf, regiao, capitulo_cid10, categoria_cid10, periodo_do_obito, racacor, investigacao_cmm) |>
       summarise(obitos = sum(as.numeric(obitos))) |>
       ungroup()
   } else {
@@ -565,10 +572,10 @@ dados_onm_filtrados <- reactive({
       filter(ano == input$selectAnoONM,
              municipio == input$selectMunicipioONM,
              periodo_do_obito %in% input$selectPeriodoONM,
-             investigacao %in% input$selectInvestigacaoONM,
+             investigacao_cmm %in% input$selectInvestigacaoONM,
              racacor %in% input$selectRacaONM,
              idade >= input$selectIdadeONM[1] & idade <= input$selectIdadeONM[2]) |>
-      group_by(ano, municipio, uf, regiao, capitulo_cid10, categoria_cid10, periodo_do_obito, racacor, investigacao) |>
+      group_by(ano, municipio, uf, regiao, capitulo_cid10, categoria_cid10, periodo_do_obito, racacor, investigacao_cmm) |>
       summarise(obitos = sum(as.numeric(obitos))) |>
       ungroup()   
   }
@@ -695,7 +702,7 @@ renderReactable(
           aggregate = JS("function() { return ''}"),
           format = list(aggregated = colFormat(prefix = "Todas"))
         ),
-        investigacao = colDef(
+        investigacao_cmm = colDef(
           name = "Investigação por CMM",
           aggregate = JS("function() { return ''}"),
           format = list(aggregated = colFormat(prefix = "Todas as categorias"))
@@ -747,31 +754,15 @@ sliderInput(
   value = c(10, 49)
 )
 
-aux_obitos_maternos_uf <- reactive({
-  dados_obitos_maternos |>
-    filter(ano == input$selectAnoUF,
-           idade >= input$selectIdadeUF[1] & idade <= input$selectIdadeUF[2]) |>
-    group_by(uf, regiao, ano) |>
-    summarise("Óbitos maternos oficiais" = sum(obitos)) |>
-    ungroup()
-  }
-) 
-
-aux_obitos_por_uf <- reactive({
+dados_tabela_obitos_uf <- reactive({
   dados_obitos_por_uf |>
     filter(ano == input$selectAnoUF,
            idade >= input$selectIdadeUF[1] & idade <= input$selectIdadeUF[2]) |>
     group_by(uf, regiao, ano) |>
-    summarise_at(vars(starts_with("Óbitos")), sum) |>
+    summarise_at(vars(starts_with("obitos")), sum) |>
     ungroup()
   }
 ) 
-
-dados_tabela_obitos_uf <- reactive({
-  full_join(aux_obitos_maternos_uf(), aux_obitos_por_uf(),
-            by = c("uf", "regiao", "ano"))
-  }
-)
 
 selectInput(
   inputId = "selectDownloadUF",
@@ -829,7 +820,32 @@ renderReactable(
     reactable(
       columns = list(
         uf = colDef(name = "UF"),
-        regiao = colDef(name = "Região")
+        regiao = colDef(name = "Região"),
+        obitos_maternos = colDef(name = "Óbitos maternos oficiais"),
+        obitos_descons_durante_a_gravidez_parto_ou_aborto_exceto_ext = colDef(
+          name = "Óbitos descons. durante a gravidez, parto ou aborto (exceto externos)"
+        ),
+        obitos_descons_durante_o_puerperio_ate_42_dias_exceto_ext = colDef(
+          name = "Óbitos descons. durante o puerpério, até 42 dias (exceto externos)"
+        ),
+        obitos_descons_durante_o_puerperio_de_43_dias_a_menos_de_1_ano_exceto_ext = colDef(
+          name = "Óbitos descons. durante o puerpério, de 43 dias a menos de 1 ano (exceto externos)"
+        ),
+        obitos_descons_periodo_inconsistente_exceto_ext = colDef(
+          name = "Óbitos descons. com período inconsistente (exceto externos)"
+        ),
+        obitos_descons_durante_a_gravidez_parto_ou_aborto_ext = colDef(
+          name = "Óbitos descons. durante a gravidez, parto ou aborto (externos)"
+        ),
+        obitos_descons_durante_o_puerperio_ate_42_dias_ext = colDef(
+          name = "Óbitos descons. durante o puerpério, até 42 dias (externos)"
+        ),
+        obitos_descons_durante_o_puerperio_de_43_dias_a_menos_de_1_ano_ext = colDef(
+          name = "Óbitos descons. durante o puerpério, de 43 dias a menos de 1 ano (externos)"
+        ),
+        obitos_descons_periodo_inconsistente_ext = colDef(
+          name = "Óbitos descons. com período inconsistente (externos)"
+        )
       ),
       height = 800,
       defaultSorted = c("uf"),
@@ -844,5 +860,6 @@ renderReactable(
       defaultColDef = colDef(footerStyle = list(fontWeight = "bold"))
     )
 )
+
 
 ```
