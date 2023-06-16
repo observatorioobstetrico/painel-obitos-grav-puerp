@@ -1,0 +1,13 @@
+name: obitos-grav-puerp
+title: obitos-grav-puerp
+username:
+account: observatorioobstetrico
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6626033
+bundleId: 7298343
+url: https://observatorioobstetrico.shinyapps.io/obitos-grav-puerp/
+when: 1685736428.71037
+lastSyncTime: 1685736428.71038
+asMultiple: FALSE
+asStatic: FALSE
