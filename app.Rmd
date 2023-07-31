@@ -38,7 +38,7 @@ body {
   color: #000000
 }
 .negrito {
-  font-weight: 600;
+  font-weight: 700;
 }
 .chart-title {
     border-bottom: 1px solid #dee2e6;
@@ -101,25 +101,25 @@ Sobre
 =============================================
 
 
-<h3><span style = "font-weight: 800;">O OOBr Óbitos de Gestantes e Puérperas</span></h3>
+<h3><span style = "font-weight: bold;">O OOBr Óbitos de Gestantes e Puérperas</span></h3>
 
 É um painel de visualização dinâmico com análises acerca da mortalidade de gestantes e puérperas no Brasil, sob a perspectiva de algumas variáveis da base de dados do Sistema de Informações sobre Mortalidade (SIM). As informações consideradas são referentes aos registros de óbitos de mulheres gestantes ou puérperas dos anos de 1996 a 2022. 
 
-<h3><span style = "font-weight: 800;">O Observatório Obstétrico Brasileiro (OOBr)</span></h3>
+<h3><span style = "font-weight: bold;">O Observatório Obstétrico Brasileiro (OOBr)</span></h3>
 
 Tem como objetivo disponibilizar plataformas interativas de monitoramento e análises de dados públicos cientificamente embasadas e disseminar informações de qualidade e relevantes acerca da área da saúde materno-infantil.
 
 Conta com **pesquisadores** da <a href = https://www.ufes.br target = _blank> Universidade Federal do Espírito Santo (UFES) </a> e da <a href = https://www5.usp.br target = _blank> Universidade de São Paulo (USP)</a>. Para maiores informações, veja o <a href = https://observatorioobstetricobr.org/ target = _blank> site do OOBr</a>.
 
-<h3><span style = "font-weight: 800;">Os dados</span></h3>
+<h3><span style = "font-weight: bold;">Os dados</span></h3>
 
-São providos do DATASUS do Ministério da Saúde e formam um grande banco anual composto por todos os registros das declarações de óbitos a partir do ano de 1996. Nessa plataforma, os dados do SIM são previamente tratados pela PCDaS com base no fluxo ETL (_Extract_, _Transform_ e _Load_). Atualmente, a PCDaS disponibiliza dados do SIM até 2022 **(sendo estes preliminares)**, atualizados na última sexta feira de cada mês, tendo a última atualização ocorrido em 30 de junho de 2023. Os dados podem ser acessados em: Herzog, R. S.; Francisco, R. P. V.; Rodrigues, A. S.  Óbitos de gestantes e puérperas [banco de dados], 2022, Observatório Obstétrico Brasileiro (OOBr). Disponível em DOI: https://doi.org/10.7303/syn42902915.
+São providos do DATASUS do Ministério da Saúde e formam um grande banco anual composto por todos os registros das declarações de óbitos a partir do ano de 1996. Nessa plataforma, os dados do SIM são previamente tratados pela PCDaS com base no fluxo ETL (_Extract_, _Transform_ e _Load_). Atualmente, a PCDaS disponibiliza dados do SIM até 2022 **(sendo estes preliminares)**, atualizados na última sexta feira de cada mês, tendo a última atualização ocorrido em 28 de julho de 2023. Os dados podem ser acessados em: Herzog, R. S.; Francisco, R. P. V.; Rodrigues, A. S.  Óbitos de gestantes e puérperas [banco de dados], 2022, Observatório Obstétrico Brasileiro (OOBr). Disponível em DOI: https://doi.org/10.7303/syn42902915.
 
-<h3><span style = "font-weight: 800;">Como citar esse painel</span></h3>
+<h3><span style = "font-weight: bold;">Como citar esse painel</span></h3>
 
 Observatório Obstétrico Brasileiro. OOBr Óbitos de Gestantes e Puérperas, 2022. Disponível em  https://observatorioobstetrico.shinyapps.io/obitos-grav-puerp. DOI: https://doi.org/10.7303/syn44144271.
 
-<h3><span style = "font-weight: 800;">Contato</span></h3>
+<h3><span style = "font-weight: bold;">Contato</span></h3>
 
 Para comentários, sugestões e colaborações científicas, por favor, envie uma mensagem para <a href="mailto:comunicacao@observatorioobstetricobr.org"> comunicacao@observatorioobstetricobr.org</a>. E para acompanhar o trabalho do OOBr de perto, siga-o nas redes acessando os ícones do canto superior direito.  
 
@@ -134,11 +134,11 @@ knitr::include_graphics("www/print-or-cinza.png")
 Inputs {.sidebar data-width=350 style="width: 350px; visibility: visible; top: 75px;"}
 ------------------------------------- 
 ```{r input-obitosM}
-hr();h5(span("Óbitos maternos oficiais", style = "font-weight: 800;")); hr()
+hr();h5(span("Óbitos maternos oficiais", style = "font-weight: bold;")); hr()
 p(em("Obs.: os dados de 2022 são preliminares."))
 
 hr()
-span("Temporalidade e localidade", style = "font-weight: 800; font-size: 17px")
+span("Temporalidade e localidade", style = "font-weight: bold; font-size: 17px")
 HTML("<span style='display: block; margin-bottom: 7px;'> </span>")
 
 numericInput(
@@ -202,7 +202,7 @@ observeEvent(input$selectEstadoMuniOM, {
 
 
 hr()
-span("Características da gestante ou puérpera", style = "font-weight: 800; font-size: 17px")
+span("Características da gestante ou puérpera", style = "font-weight: bold; font-size: 17px")
 HTML("<span style='display: block; margin-bottom: 7px;'> </span>")
 
 sliderInput(
@@ -378,7 +378,7 @@ A coluna "Investigação por CMM" indica se os óbitos foram, ou não, investiga
 Row 
 -------------------------------------
    
-### Tabela de óbitos maternos oficiais
+### <span style = 'font-weight: 700; color: black'>Tabela de óbitos maternos oficiais</span>
 
 ```{r tabela_om}
 dados_tabela_om <- reactive({
@@ -467,7 +467,7 @@ renderReactable({
         rowStyle = JS(
           "function(rowInfo) {
           if (rowInfo.aggregated === true) {
-           return { fontWeight: 600 }
+           return { fontWeight: 700 }
           }
         }"
         )
@@ -484,11 +484,11 @@ renderReactable({
 Inputs {.sidebar data-width=350 style="width: 350px; visibility: visible; top: 75px;"}
 ------------------------------------- 
 ```{r input-obitosNM}
-hr(); h5(span("Óbitos de gestantes e puérperas não considerados", style = "font-weight: 800;")); hr()
+hr(); h5(span("Óbitos de gestantes e puérperas não considerados", style = "font-weight: bold;")); hr()
 p(em(HTML(paste("Obs.: os dados de 2022 são preliminares."))))
 
 hr()
-span("Temporalidade e localidade", style = "font-weight: 800; font-size: 17px")
+span("Temporalidade e localidade", style = "font-weight: bold; font-size: 17px")
 HTML("<span style='display: block; margin-bottom: 7px;'> </span>")
 
 numericInput(
@@ -550,7 +550,7 @@ observeEvent(input$selectEstadoMuniONM, {
 })
 
 hr()
-span("Características da gestante ou puérpera", style = "font-weight: 800; font-size: 17px")
+span("Características da gestante ou puérpera", style = "font-weight: bold; font-size: 17px")
 HTML("<span style='display: block; margin-bottom: 7px;'> </span>")
 
 sliderInput(
@@ -723,7 +723,7 @@ A coluna "Investigação por CMM" indica se os óbitos foram, ou não, investiga
 Row 
 -------------------------------------
    
-### Tabela de óbitos de gestantes e puérperas não considerados 
+### <span style = 'font-weight: 700; color: black'>Tabela de óbitos de gestantes e puérperas não considerados</span>
 
 ```{r table_onm}
 dados_tabela_onm <- reactive({
@@ -800,7 +800,7 @@ renderReactable({
         rowStyle = JS(
           "function(rowInfo) {
         if (rowInfo.level <= 1) {
-          return { fontWeight: 600 }
+          return { fontWeight: 700 }
         }
         }"
         )
@@ -815,7 +815,7 @@ renderReactable({
 Inputs {.sidebar data-width=350 style="width: 350px; visibility: visible; top: 75px;"}
 ------------------------------------- 
 ```{r input-obitosUF}
-hr(); h5(span("Óbitos de gestantes e puérperas por estado", style = "font-weight: 800;")); hr()
+hr(); h5(span("Óbitos de gestantes e puérperas por estado", style = "font-weight: bold;")); hr()
 p(em(HTML(paste("Obs.: os dados de 2022 são preliminares."))))
 
 numericInput(
@@ -891,7 +891,7 @@ Essa tabela contém todos os óbitos de mulheres que ocorreram durante a gravide
 Row 
 -------------------------------------
   
-### Tabela de óbitos de gestantes e puérperas por estado
+### <span style = 'font-weight: 700; color: black'>Tabela de óbitos de gestantes e puérperas por estado</span>
   
 ```{r table_ufs}
 renderReactable(
@@ -950,11 +950,11 @@ Análise cruzada {data-navmenu="Visualizações"}
 Inputs {.sidebar data-width=350 style="width: 350px; visibility: visible; top: 75px;"}
 ------------------------------------- 
 ```{r input-analiseCruzada}
-hr(); h5(span("Análise cruzada", style = "font-weight: 800;")); hr()
+hr(); h5(span("Análise cruzada", style = "font-weight: bold;")); hr()
 p(em("Obs.: os dados de 2022 são preliminares."))
 
 hr()
-span("Temporalidade e localidade", style = "font-weight: 800; font-size: 17px")
+span("Temporalidade e localidade", style = "font-weight: bold; font-size: 17px")
 HTML("<span style='display: block; margin-bottom: 7px;'> </span>")
 
 sliderInput(
@@ -1028,7 +1028,7 @@ observeEvent(input$selectEstadoMuniAC, {
 
 
 hr()
-span("Variáveis de interesse", style = "font-weight: 800; font-size: 17px")
+span("Variáveis de interesse", style = "font-weight: bold; font-size: 17px")
 HTML("<span style='display: block; margin-bottom: 7px;'> </span>")
 
 
@@ -1099,7 +1099,7 @@ observeEvent(input$selectNivelAC, {
 
 
 hr()
-span("Características da gestante ou puérpera", style = "font-weight: 800; font-size: 17px")
+span("Características da gestante ou puérpera", style = "font-weight: bold; font-size: 17px")
 HTML("<span style='display: block; margin-bottom: 7px;'> </span>")
 
 sliderInput(
@@ -1163,7 +1163,7 @@ checkboxGroupInput(
 Row 
 ---------------------------------------------
 
-### Óbitos maternos agrupados pelas variáveis selecionadas
+### <span style = 'font-weight: 700; color: black'>Óbitos maternos agrupados pelas variáveis selecionadas</span>
 
 ```{r plot_ac}
 dados_analise_cruzada <- reactive({
@@ -1233,7 +1233,7 @@ highcharter::renderHighchart({
 Row
 -------------------------------------
 
-### Tabela cruzada
+### <span style = 'font-weight: 700; color: black'>Tabela cruzada</span>
                       
 ```{r table_ac}
 tbl_cross_ex1 <- reactive({
