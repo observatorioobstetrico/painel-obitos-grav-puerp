@@ -113,7 +113,7 @@ Conta com **pesquisadores** da <a href = https://www.ufes.br target = _blank> Un
 
 <h3><span style = "font-weight: bold;">Os dados</span></h3>
 
-São providos do DATASUS do Ministério da Saúde e formam um grande banco anual composto por todos os registros das declarações de óbitos a partir do ano de 1996. Nessa plataforma, os dados do SIM são previamente tratados pela PCDaS com base no fluxo ETL (_Extract_, _Transform_ e _Load_). Atualmente, a PCDaS disponibiliza dados do SIM até 2022 **(sendo estes preliminares)**, atualizados na última sexta feira de cada mês, tendo a última atualização ocorrido em 28 de julho de 2023. Os dados podem ser acessados em: Herzog, R. S.; Francisco, R. P. V.; Rodrigues, A. S.  Óbitos de gestantes e puérperas [banco de dados], 2022, Observatório Obstétrico Brasileiro (OOBr). Disponível em DOI: https://doi.org/10.7303/syn42902915.
+São providos do DATASUS do Ministério da Saúde e formam um grande banco anual composto por todos os registros das declarações de óbitos a partir do ano de 1996. Nessa plataforma, os dados do SIM são previamente tratados pela PCDaS com base no fluxo ETL (_Extract_, _Transform_ e _Load_). Atualmente, a PCDaS disponibiliza dados do SIM até 2022 **(sendo estes preliminares)**, atualizados na última sexta feira de cada mês, tendo a última atualização ocorrido em 31 de agosto de 2023. Os dados podem ser acessados em: Herzog, R. S.; Francisco, R. P. V.; Rodrigues, A. S.  Óbitos de gestantes e puérperas [banco de dados], 2022, Observatório Obstétrico Brasileiro (OOBr). Disponível em DOI: https://doi.org/10.7303/syn42902915.
 
 <h3><span style = "font-weight: bold;">Como citar esse painel</span></h3>
 
@@ -123,9 +123,47 @@ Observatório Obstétrico Brasileiro. OOBr Óbitos de Gestantes e Puérperas, 20
 
 Para comentários, sugestões e colaborações científicas, por favor, envie uma mensagem para <a href="mailto:comunicacao@observatorioobstetricobr.org"> comunicacao@observatorioobstetricobr.org</a>. E para acompanhar o trabalho do OOBr de perto, siga-o nas redes acessando os ícones do canto superior direito.  
 
-```{r logos, echo = FALSE, fig.align ='center', out.width="100%"}
-knitr::include_graphics("www/print-or-cinza.png")
+<h3><span style = "font-weight: bold;">Realização</span></h3>
+
+<center>
+```{r, out.width="10%", fig.show='hold'}
+knitr::include_graphics(c(
+  "www/logos/realizacao/logo_oobr.png",
+  "www/logos/realizacao/logo_ufes.png",
+  "www/logos/realizacao/logo_medicina_usp.png", 
+  "www/logos/realizacao/logo_daslab.png"
+))
 ```
+</center>
+
+<h3><span style = "font-weight: bold;">Financiadores</span></h3>
+
+<center>
+```{r, teste, out.width="10%", fig.show='hold'}
+knitr::include_graphics(c(
+  "www/logos/financiadores/logo_bill_melinda.png",
+  "www/logos/financiadores/logo_cnpq.png",
+  "www/logos/financiadores/logo_ms1.png", 
+  "www/logos/financiadores/logo_ms2.png", 
+  "www/logos/financiadores/logo_ms3.png", 
+  "www/logos/financiadores/logo_fapes.png",
+  "www/logos/financiadores/logo_fapes2.png"
+))
+```
+</center>
+
+
+<h3><span style = "font-weight: bold;">Apoio</span></h3>
+
+<center>
+```{r, out.width="8%", fig.show='hold'}
+knitr::include_graphics(c(
+  "www/logos/apoio/logo_pcdas.png",
+  "www/logos/apoio/logo_odd.png"
+))
+```
+</center>
+
 
 
 Óbitos maternos oficiais {data-navmenu="Visualizações"}
