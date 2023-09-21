@@ -1,0 +1,13 @@
+name: mortes_maternas_2
+title: mortes_maternas_2
+username:
+account: observatorioobstetrico
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6362981
+bundleId: 6058584
+url: https://observatorioobstetrico.shinyapps.io/mortes_maternas_2/
+when: 1656611315.93444
+lastSyncTime: 1656611315.93444
+asMultiple: FALSE
+asStatic: FALSE
