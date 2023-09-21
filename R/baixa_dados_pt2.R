@@ -4,12 +4,11 @@ library(tidyr)
 library(data.table)
 
 #Lendo o arquivo com os dados preliminares do SIM de 2022
-dados_preliminares_2022 <- fread("DO22OPEN_T.csv", encoding = "UTF-8") 
+dados_preliminares_2022 <- fread("R/databases/DO22OPEN_T.csv", encoding = "UTF-8") 
 
 # Para a seção de óbitos maternos oficiais --------------------------------
 ##Lendo o arquivo com os óbitos maternos de 1996 a 2021
-dados_obitos_maternos_1996_2021 <- read.csv("Obitos_maternos_muni2022.csv") |>
-  filter(ano < 2022)
+dados_obitos_maternos_1996_2021 <- read.csv("R/databases/Obitos_maternos_muni2021.csv") 
 
 ##Nos dados preliminares, filtrando apenas pelos óbitos maternos
 df_maternos_preliminares_aux <- dados_preliminares_2022 |>
@@ -76,8 +75,7 @@ write.table(df_obitos_maternos, 'Obitos_maternos_muni2022.csv', sep = ",", dec =
 
 # Para a seção de análise cruzada -----------------------------------------
 ##Lendo o arquivo com os óbitos maternos para a análise cruzada de 1996 a 2021
-dados_ac_1996_2021 <- read.csv("Obitos_maternos_estendidos_1996_2022.csv") |>
-  filter(ano_obito < 2022)
+dados_ac_1996_2021 <- read.csv("R/databases/Obitos_maternos_estendidos_1996_2021.csv") 
 
 ##Nos dados preliminares, filtrando apenas pelos óbitos maternos
 df_ac_preliminares_aux <- dados_preliminares_2022 |>
@@ -142,22 +140,16 @@ df_ac_preliminares[is.na(df_ac_preliminares)] <- "Ignorado"
 ##Juntando as duas bases
 df_obitos_maternos_ac <- full_join(
   dados_ac_1996_2021,
-  df_ac_preliminares,
-  by = join_by(
-    regiao, uf, municipio, ano_obito, raca_cor, est_civil, escolaridade, local_ocorrencia_obito, idade_obito, peso,
-    assistencia_med, necropsia, causabas_capitulo, causabas_categoria, obito_em_idade_fertil, tipo_de_morte_materna, periodo_do_obito,
-    investigacao_cmm
-  )
+  df_ac_preliminares
 )
 
 ##Exportando os dados 
-write.table(df_obitos_maternos_ac, 'Obitos_maternos_estendidos_1996_2022.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_obitos_maternos_ac, 'Obitos_maternos_estendidos_1996_2021.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
 # Para a seção de óbitos maternos desconsiderados -------------------------
 ##Lendo o arquivo com os óbitos de gestantes e puérperas desconsiderados de 1996 a 2021
-dados_desconsiderados_1996_2021 <- read.csv("Obitos_desconsiderados_muni2022.csv") |>
-  filter(ano< 2022)
+dados_desconsiderados_1996_2021 <- read.csv("R/databases/Obitos_desconsiderados_muni2021.csv") 
 
 ##Nos dados preliminares, filtrando apenas pelos óbitos de gestantes e puérperas desconsiderados
 df_descons_preliminares_aux <- dados_preliminares_2022 |>

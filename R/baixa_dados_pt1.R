@@ -27,7 +27,7 @@ convertRequestToDF <- function(request){
 estados <- c('RO','AC','AM','RR','PA','AP','TO','MA','PI','CE','RN','PB','PE','AL','SE','BA','MG','ES','RJ','SP','PR','SC','RS','MS','MT','GO','DF')
 endpoint <- paste0(url_base,"/","sql_query")
 
-##Óbitos maternos oficiais dos anos de 1996 a 2022
+##Óbitos maternos oficiais dos anos de 1996 a 2021
 df_obitos_maternos_aux <- dataframe <- data.frame()
 
 for (estado in estados){
@@ -38,7 +38,7 @@ for (estado in estados){
       },
       "sql": {
         "sql": {"query":" SELECT res_REGIAO, res_SIGLA_UF, res_MUNNOME, res_codigo_adotado, ano_obito, CAUSABAS, causabas_capitulo, causabas_categoria, OBITOGRAV, OBITOPUERP, def_raca_cor, idade_obito_anos, FONTEINV, COUNT(1)',
-                        ' FROM \\"datasus-sim_final_1996-2020_preliminar_2021_2022\\"',
+                        ' FROM \\"datasus-sim\\"',
                         ' WHERE (res_SIGLA_UF = \'',estado,'\' AND SEXO = 2 AND',
                               ' ((CAUSABAS >= \'O000\'  AND  CAUSABAS <= \'O959\') OR',
                               ' (CAUSABAS >= \'O980\'  AND  CAUSABAS <= \'O999\') OR',
@@ -68,7 +68,7 @@ for (estado in estados){
           },
           "sql": {
             "sql": {"query":" SELECT res_REGIAO, res_SIGLA_UF, res_MUNNOME, res_codigo_adotado, ano_obito, CAUSABAS, causabas_capitulo, causabas_categoria, OBITOGRAV, OBITOPUERP, def_raca_cor, idade_obito_anos, FONTEINV, COUNT(1)',
-                            ' FROM \\"datasus-sim_final_1996-2020_preliminar_2021_2022\\"',
+                            ' FROM \\"datasus-sim\\"',
                             ' WHERE (res_SIGLA_UF = \'',estado,'\' AND SEXO = 2 AND',
                                   ' ((CAUSABAS >= \'O000\'  AND  CAUSABAS <= \'O959\') OR',
                                   ' (CAUSABAS >= \'O980\'  AND  CAUSABAS <= \'O999\') OR',
@@ -129,10 +129,10 @@ df_obitos_maternos <- df_obitos_maternos_aux |>
 df_obitos_maternos$idade <- as.numeric(df_obitos_maternos$idade)
 
 ##Exportando os dados 
-write.table(df_obitos_maternos, 'Obitos_maternos_muni2022.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_obitos_maternos, 'R/databases/Obitos_maternos_muni2021.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
-##Óbitos maternos oficiais dos anos de 1996 a 2022 para o menu de análise cruzada
+##Óbitos maternos oficiais dos anos de 1996 a 2021 para o menu de análise cruzada
 df_obitos_maternos_ac_aux <- dataframe <- data.frame()
 
 for (estado in estados){
@@ -143,7 +143,7 @@ for (estado in estados){
       },
       "sql": {
         "sql": {"query":" SELECT res_REGIAO, res_SIGLA_UF, res_MUNNOME, res_codigo_adotado, ano_obito, def_raca_cor, def_est_civil, ESC2010, def_loc_ocor, idade_obito_anos, PESO, def_assist_med, def_necropsia, FONTEINV, CAUSABAS, causabas_capitulo, causabas_categoria, OBITOGRAV, OBITOPUERP, COUNT(1)',
-                  ' FROM \\"datasus-sim_final_1996-2020_preliminar_2021_2022\\"',
+                  ' FROM \\"datasus-sim\\"',
                   ' WHERE (res_SIGLA_UF = \'',estado,'\' AND SEXO = 2 AND',
                   ' ((CAUSABAS >= \'O000\'  AND  CAUSABAS <= \'O959\') OR',
                   ' (CAUSABAS >= \'O980\'  AND  CAUSABAS <= \'O999\') OR',
@@ -173,7 +173,7 @@ for (estado in estados){
           },
           "sql": {
             "sql": {"query":" SELECT res_REGIAO, res_SIGLA_UF, res_MUNNOME, res_codigo_adotado, ano_obito, def_raca_cor, def_est_civil, ESC2010, def_loc_ocor, idade_obito_anos, PESO, def_assist_med, def_necropsia, FONTEINV, CAUSABAS, causabas_capitulo, causabas_categoria, OBITOGRAV, OBITOPUERP, COUNT(1)',
-                    ' FROM \\"datasus-sim_final_1996-2020_preliminar_2021_2022\\"',
+                    ' FROM \\"datasus-sim\\"',
                     ' WHERE (res_SIGLA_UF = \'',estado,'\' AND SEXO = 2 AND',
                     ' ((CAUSABAS >= \'O000\'  AND  CAUSABAS <= \'O959\') OR',
                     ' (CAUSABAS >= \'O980\'  AND  CAUSABAS <= \'O999\') OR',
@@ -251,10 +251,10 @@ df_obitos_maternos_ac$idade_obito[is.na(df_obitos_maternos_ac$idade_obito)] <- 9
 df_obitos_maternos_ac[is.na(df_obitos_maternos_ac)] <- "Ignorado"
 
 ##Exportando os dados 
-write.table(df_obitos_maternos_ac, 'Obitos_maternos_estendidos_1996_2022.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_obitos_maternos_ac, 'R/databases/Obitos_maternos_estendidos_1996_2021.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
-#Óbitos maternos desconsiderados dos anos de 1996 a 2022
+#Óbitos maternos desconsiderados dos anos de 1996 a 2021
 df_obitos_desconsiderados_aux <- dataframe <- data.frame()
 
 for (estado in estados){
@@ -265,7 +265,7 @@ for (estado in estados){
       },
       "sql": {
         "sql": {"query":" SELECT res_REGIAO, res_SIGLA_UF, res_MUNNOME, res_codigo_adotado, ano_obito, CAUSABAS, causabas_capitulo, causabas_categoria, OBITOGRAV, OBITOPUERP, def_raca_cor, idade_obito_anos, FONTEINV, COUNT(1)',
-                  ' FROM \\"datasus-sim_final_1996-2020_preliminar_2021_2022\\"',
+                  ' FROM \\"datasus-sim\\"',
                   ' WHERE (res_SIGLA_UF = \'',estado,'\' AND SEXO = 2 AND (OBITOGRAV = 1 OR OBITOPUERP = 1 OR OBITOPUERP = 2) AND',
                         ' NOT (((CAUSABAS >= \'O000\'  AND  CAUSABAS <= \'O959\') OR',
                             ' (CAUSABAS >= \'O980\'  AND  CAUSABAS <= \'O999\') OR',
@@ -295,7 +295,7 @@ for (estado in estados){
           },
           "sql": {
             "sql": {"query":" SELECT res_REGIAO, res_SIGLA_UF, res_MUNNOME, res_codigo_adotado, ano_obito, CAUSABAS, causabas_capitulo, causabas_categoria, OBITOGRAV, OBITOPUERP, def_raca_cor, idade_obito_anos, FONTEINV, COUNT(1)',
-                    ' FROM \\"datasus-sim_final_1996-2020_preliminar_2021_2022\\"',
+                    ' FROM \\"datasus-sim\\"',
                     ' WHERE (res_SIGLA_UF = \'',estado,'\' AND SEXO = 2 AND (OBITOGRAV = 1 OR OBITOPUERP = 1 OR OBITOPUERP = 2) AND',
                           ' NOT (((CAUSABAS >= \'O000\'  AND  CAUSABAS <= \'O959\') OR',
                               ' (CAUSABAS >= \'O980\'  AND  CAUSABAS <= \'O999\') OR',
@@ -346,11 +346,11 @@ df_obitos_desconsiderados$idade <- as.numeric(df_obitos_desconsiderados$idade)
 
 
 ##Exportando os dados 
-write.table(df_obitos_desconsiderados, 'Obitos_desconsiderados_muni2022.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_obitos_desconsiderados, 'R/databases/Obitos_desconsiderados_muni2021.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
 
-##Óbitos de grávidas e puérperas por estado dos anos de 1996 a 2022
+##Óbitos de grávidas e puérperas por estado dos anos de 1996 a 2021
 df_obitos_desc_uf <- df_obitos_desconsiderados |>
   clean_names() |>
   mutate(
@@ -381,7 +381,7 @@ df_obitos_uf[is.na(df_obitos_uf)] <- 0
 df_obitos_uf$idade <- as.numeric(df_obitos_uf$idade)
 
 ##Exportando os dados
-write.table(df_obitos_uf, 'Obitos_por_uf2022.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_obitos_uf, 'R/databases/Obitos_por_uf2021.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
 
