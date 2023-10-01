@@ -73,6 +73,7 @@ df_obitos_maternos <- full_join(
 write.table(df_obitos_maternos, 'dados_oobr_obitos_grav_puerp_maternos_oficiais_2022.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
+
 # Para a seção de análise cruzada -----------------------------------------
 ##Lendo o arquivo com os óbitos maternos para a análise cruzada de 1996 a 2021
 dados_ac_1996_2021 <- read.csv("R/databases/Obitos_maternos_estendidos2021.csv") 
@@ -205,6 +206,7 @@ df_obitos_desconsiderados <- full_join(
 ##Exportando os dados 
 write.table(df_obitos_desconsiderados, 'dados_oobr_obitos_grav_puerp_desconsiderados_2022.csv', sep = ",", dec = ".", row.names = FALSE)
 
+
 # Para a seção de óbitos maternos por UF ----------------------------------
 df_obitos_desc_uf <- df_obitos_desconsiderados |>
   clean_names() |>
@@ -237,5 +239,6 @@ df_obitos_uf$idade <- as.numeric(df_obitos_uf$idade)
 
 ##Exportando os dados
 write.table(df_obitos_uf, 'dados_oobr_obitos_grav_puerp_ufs_2022.csv', sep = ",", dec = ".", row.names = FALSE)
+
 
 
