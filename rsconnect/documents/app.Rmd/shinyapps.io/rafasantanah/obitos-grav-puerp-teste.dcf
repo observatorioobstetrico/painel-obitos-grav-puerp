@@ -1,0 +1,14 @@
+name: obitos-grav-puerp-teste
+title: obitos-grav-puerp-teste
+username:
+account: rafasantanah
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6703956
+bundleId: 6139938
+url: https://rafasantanah.shinyapps.io/obitos-grav-puerp-teste/
+when: 1658957416.96649
+lastSyncTime: 1658957416.9665
+asMultiple: TRUE
+asStatic: FALSE
+ignoredFiles: teste.Rmd
