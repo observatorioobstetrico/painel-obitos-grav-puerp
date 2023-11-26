@@ -1,11 +1,133 @@
-library(dplyr)
+library(microdatasus)
+library(tidyverse)
+library(httr)
 library(janitor)
-library(tidyr)
+library(getPass)
+library(repr)
 library(data.table)
+library(readr)
 
-#Lendo o arquivo com os dados preliminares do SIM de 2022
-dados_preliminares_2022 <- fread("R/databases/DO22OPEN_T.csv", encoding = "UTF-8") 
+token = getPass()  #Token de acesso à API da PCDaS (todos os arquivos gerados se encontram na pasta "Databases", no Google Drive)
 
+url_base = "https://bigdata-api.fiocruz.br"
+
+convertRequestToDF <- function(request){
+  variables = unlist(content(request)$columns)
+  variables = variables[names(variables) == "name"]
+  column_names <- unname(variables)
+  values = content(request)$rows
+  df <- as.data.frame(do.call(rbind,lapply(values,function(r) {
+    row <- r
+    row[sapply(row, is.null)] <- NA
+    rbind(unlist(row))
+  } )))
+  names(df) <- column_names
+  return(df)
+}
+
+endpoint <- paste0(url_base,"/","sql_query")
+
+
+# Criando data.frames auxiliares ------------------------------------------
+## Obtendo um dataframe com o nome dos capítulos e categorias da CID10 --------
+df_cid10 <- data.frame()
+params = paste0('{
+      "token": {
+        "token": "',token,'"
+      },
+      "sql": {
+        "sql": {"query":" SELECT CAUSABAS, causabas_capitulo, causabas_categoria, COUNT(1)',
+                ' FROM \\"datasus-sim\\"',
+                ' GROUP BY CAUSABAS, causabas_capitulo, causabas_categoria",
+                        "fetch_size": 65000}
+      }
+    }')
+
+request <- POST(url = endpoint, body = params, encode = "form")
+df_cid10 <- convertRequestToDF(request)
+names(df_cid10) <- c("CAUSABAS", "causabas_capitulo", "causabas_categoria", "obitos")
+
+df_cid10 <- df_cid10 |>
+  select(!obitos) |>
+  arrange(CAUSABAS)
+
+
+## Obtendo um dataframe com as regiões, UFs e nomes de cada município -------
+df_aux_municipios <- data.frame()
+params = paste0('{
+      "token": {
+        "token": "',token,'"
+      },
+      "sql": {
+        "sql": {"query":" SELECT res_codigo_adotado, res_MUNNOME, res_SIGLA_UF, res_REGIAO, COUNT(1)',
+                ' FROM \\"datasus-sinasc\\"',
+                ' GROUP BY res_codigo_adotado, res_MUNNOME, res_SIGLA_UF, res_REGIAO",
+                        "fetch_size": 65000}
+      }
+    }')
+
+request <- POST(url = endpoint, body = params, encode = "form")
+df_aux_municipios <- convertRequestToDF(request)
+names(df_aux_municipios) <- c("CODMUNRES", "res_MUNNOME", "res_SIGLA_UF", "res_REGIAO", "nascidos")
+
+df_aux_municipios <- df_aux_municipios |>
+  select(!nascidos) |>
+  arrange(CODMUNRES)
+
+## Baixando os dados preliminares do SIM de 2022 ---------------------------
+dados_preliminares_2022_aux <- fetch_datasus(
+  year_start = 2022, 
+  year_end = 2022,
+  information_system = "SIM-DO"
+) 
+
+dados_preliminares_2022 <- dados_preliminares_2022_aux |>
+  mutate(
+    ano_obito = as.numeric(substr(DTOBITO, nchar(DTOBITO) - 3, nchar(DTOBITO))),
+    idade_obito_anos = if_else(
+      IDADE != "000" & IDADE < "400",
+      0,
+      case_when(
+        IDADE == "000" | is.na(IDADE) ~ 99,
+        IDADE >= "400" & IDADE < "500" ~ as.numeric(substr(IDADE, 2, 3)),
+        IDADE >= "500" ~ as.numeric(substr(IDADE, 2, 3)) + 100
+      ),
+      missing = 99
+    ),
+    def_raca_cor = case_when(
+      RACACOR == "1" ~ "Branca",
+      RACACOR == "2" ~ "Preta",
+      RACACOR == "3" ~ "Amarela",
+      RACACOR == "4" ~ "Parda",
+      RACACOR == "5" ~ "Indígena",
+      is.na(RACACOR) ~ "Ignorado"
+    ),
+    def_est_civil = case_when(
+      ESTCIV == "9" | is.na(ESTCIV) ~ "Ignorado",
+      ESTCIV == "1" ~ "Solteiro",
+      ESTCIV == "2" ~ "Casado",
+      ESTCIV == "3" ~ "Viúvo",
+      ESTCIV == "4" ~ "Separado Judic./Divorciado",
+      ESTCIV == "5" ~ "União consensual"
+    ),
+    def_loc_ocor = case_when(
+      LOCOCOR == "9" | is.na(LOCOCOR) ~ "Ignorado",
+      LOCOCOR == "1" ~ "Hospital",
+      LOCOCOR == "2" ~ "Outro Estab. Saúde",
+      LOCOCOR == "3" ~ "Domicílio",
+      LOCOCOR == "4" ~ "Via Pública",
+      LOCOCOR == "5" ~ "Outros",
+      LOCOCOR == "6" ~ "Hospital"  #Parei aqui, faltam criar outras variáveis e descobrir o que é o 6
+    ),
+    .keep = "unused"
+  ) |>
+  mutate_at(
+    vars(SEXO, OBITOGRAV, OBITOPUERP),
+    as.numeric
+  ) |>
+  left_join(df_cid10) |>
+  left_join(df_aux_municipios)
+  
 # Para a seção de óbitos maternos oficiais --------------------------------
 ##Lendo o arquivo com os óbitos maternos de 1996 a 2021
 dados_obitos_maternos_1996_2021 <- read.csv("R/databases/Obitos_maternos_muni2021.csv") 
@@ -20,10 +142,10 @@ df_maternos_preliminares_aux <- dados_preliminares_2022 |>
        ((CAUSABAS >= "B200"  &  CAUSABAS <= "B249") & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
        (CAUSABAS == "D392" & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
        (CAUSABAS == "E230" & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
-       ((CAUSABAS >= "F530"  &  CAUSABAS <= "F539") & (OBITOPUERP != 2 | OBITOPUERP == " ")) |
+       ((CAUSABAS >= "F530"  &  CAUSABAS <= "F539") & (OBITOPUERP != 2)) |
        (CAUSABAS == "M830" & OBITOPUERP != 2))
   ) |>
-  select(res_REGIAO, res_SIGLA_UF, res_MUNNOME, res_codigo_adotado, ano_obito, CAUSABAS, causabas_capitulo, causabas_categoria, OBITOGRAV, OBITOPUERP, def_raca_cor, idade_obito_anos, FONTEINV) |>
+  select(res_REGIAO, res_SIGLA_UF, res_MUNNOME, CODMUNRES, ano_obito, CAUSABAS, causabas_capitulo, causabas_categoria, OBITOGRAV, OBITOPUERP, def_raca_cor, idade_obito_anos, FONTEINV) |>
   mutate(obitos = 1) |>
   group_by(across(!obitos)) |>
   summarise(obitos = sum(obitos)) |>
@@ -92,10 +214,10 @@ df_ac_preliminares_aux <- dados_preliminares_2022 |>
        ((CAUSABAS >= "B200"  &  CAUSABAS <= "B249") & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
        (CAUSABAS == "D392" & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
        (CAUSABAS == "E230" & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
-       ((CAUSABAS >= "F530"  &  CAUSABAS <= "F539") & (OBITOPUERP != 2 | OBITOPUERP == " ")) |
+       ((CAUSABAS >= "F530"  &  CAUSABAS <= "F539") & (OBITOPUERP != 2)) |
        (CAUSABAS == "M830" & OBITOPUERP != 2))
   ) |>
-  select(res_REGIAO, res_SIGLA_UF, res_MUNNOME, res_codigo_adotado, ano_obito, def_raca_cor, def_est_civil, ESC2010, def_loc_ocor, idade_obito_anos, PESO, def_assist_med, def_necropsia, FONTEINV, CAUSABAS, causabas_capitulo, causabas_categoria, OBITOGRAV, OBITOPUERP)
+  select(res_REGIAO, res_SIGLA_UF, res_MUNNOME, CODMUNRES, ano_obito, def_raca_cor, def_est_civil, ESC2010, def_loc_ocor, idade_obito_anos, PESO, def_assist_med, def_necropsia, FONTEINV, CAUSABAS, causabas_capitulo, causabas_categoria, OBITOGRAV, OBITOPUERP)
 
 colnames(df_ac_preliminares_aux) <- c("regiao", "uf", "municipio", "codigo", "ano_obito", "raca_cor", "est_civil", "escolaridade", "local_ocorrencia_obito", "idade_obito", "peso", "assistencia_med", "necropsia", "fonteinv", "causabas", "causabas_capitulo", "causabas_categoria", "obitograv", "obitopuerp")
 
@@ -168,10 +290,10 @@ df_descons_preliminares_aux <- dados_preliminares_2022 |>
        ((CAUSABAS >= "B200"  &  CAUSABAS <= "B249") & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
        (CAUSABAS == "D392" & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
        (CAUSABAS == "E230" & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
-       ((CAUSABAS >= "F530"  &  CAUSABAS <= "F539") & (OBITOPUERP != 2 | OBITOPUERP == " ")) |
+       ((CAUSABAS >= "F530"  &  CAUSABAS <= "F539") & (OBITOPUERP != 2)) |
        (CAUSABAS == "M830" & OBITOPUERP != 2))
   ) |>
-  select(res_REGIAO, res_SIGLA_UF, res_MUNNOME, res_codigo_adotado, ano_obito, CAUSABAS, causabas_capitulo, causabas_categoria, OBITOGRAV, OBITOPUERP, def_raca_cor, idade_obito_anos, FONTEINV) |>
+  select(res_REGIAO, res_SIGLA_UF, res_MUNNOME, CODMUNRES, ano_obito, CAUSABAS, causabas_capitulo, causabas_categoria, OBITOGRAV, OBITOPUERP, def_raca_cor, idade_obito_anos, FONTEINV) |>
   mutate(obitos = 1) |>
   group_by(across(!obitos)) |>
   summarise(obitos = sum(obitos)) |>

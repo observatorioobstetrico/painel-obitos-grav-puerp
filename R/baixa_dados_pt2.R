@@ -170,9 +170,9 @@ df_maternos_preliminares <- dados_preliminares_2022 |>
   ) |>
   arrange(regiao, uf)
 
-df_maternos_preliminares$codigo <- as.numeric(df_maternos_preliminares_aux$codigo)
-df_maternos_preliminares$ano <- as.numeric(df_maternos_preliminares_aux$ano)
-df_maternos_preliminares$idade <- as.numeric(df_maternos_preliminares_aux$idade)
+df_maternos_preliminares$codigo <- as.numeric(df_maternos_preliminares$codigo)
+df_maternos_preliminares$ano <- as.numeric(df_maternos_preliminares$ano)
+df_maternos_preliminares$idade <- as.numeric(df_maternos_preliminares$idade)
 
 
 ##Juntando as duas bases
