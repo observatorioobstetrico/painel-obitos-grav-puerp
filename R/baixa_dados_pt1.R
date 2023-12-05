@@ -121,7 +121,7 @@ df_obitos_maternos <- df_obitos_maternos_aux |>
     .after = causabas_categoria,
     investigacao_cmm = if_else(fonteinv == "1", true = "Sim", false = if_else(fonteinv == "9", true = "Sem informação", false = "Não",  missing = "Sem informação"), missing = "Sem informação")
   ) |> 
-  select(!c(codigo, causabas, obitograv, obitopuerp, fonteinv)) |>
+  select(!c(causabas, obitograv, obitopuerp, fonteinv)) |>
   group_by(across(!obitos)) |>
   summarise(obitos = sum(as.numeric(obitos))) |>
   ungroup()
@@ -244,7 +244,7 @@ df_obitos_maternos_ac <- df_obitos_maternos_ac_aux2 |>
     .after = causabas_categoria,
     investigacao_cmm = if_else(fonteinv == "1", true = "Sim", false = if_else(fonteinv == "9", true = "Sem informação", false = "Não",  missing = "Sem informação"), missing = "Sem informação")
   ) |> 
-  select(!c(codigo, causabas, obitograv, obitopuerp, fonteinv)) 
+  select(!c(causabas, obitograv, obitopuerp, fonteinv)) 
 
 df_obitos_maternos_ac$idade_obito <- as.numeric(df_obitos_maternos_ac$idade_obito)
 df_obitos_maternos_ac$idade_obito[is.na(df_obitos_maternos_ac$idade_obito)] <- 99
@@ -337,7 +337,7 @@ df_obitos_desconsiderados <- df_obitos_desconsiderados_aux |>
     .after = causabas_categoria,
     investigacao_cmm = if_else(fonteinv == "1", true = "Sim", false = if_else(fonteinv == "9", true = "Sem informação", false = "Não",  missing = "Sem informação"), missing = "Sem informação")
   ) |> 
-  select(!c(codigo, causabas, obitograv, obitopuerp, fonteinv)) |>
+  select(!c(causabas, obitograv, obitopuerp, fonteinv)) |>
   group_by(across(!obitos)) |>
   summarise(obitos = sum(as.numeric(obitos))) |>
   ungroup()

@@ -7,7 +7,7 @@ library(repr)
 library(data.table)
 library(readr)
 
-token = getPass()  #Token de acesso ‡ API da PCDaS (todos os arquivos gerados se encontram na pasta "Databases", no Google Drive)
+token = getPass()  #Token de acesso √† API da PCDaS (todos os arquivos gerados se encontram na pasta "Databases", no Google Drive)
 
 url_base = "https://bigdata-api.fiocruz.br"
 
@@ -29,7 +29,7 @@ endpoint <- paste0(url_base,"/","sql_query")
 
 
 # Criando data.frames auxiliares ------------------------------------------
-## Obtendo um dataframe com o nome dos capÌtulos e categorias da CID10 --------
+## Obtendo um dataframe com o nome dos cap√≠tulos e categorias da CID10 --------
 df_cid10 <- data.frame()
 params = paste0('{
       "token": {
@@ -45,90 +45,131 @@ params = paste0('{
 
 request <- POST(url = endpoint, body = params, encode = "form")
 df_cid10 <- convertRequestToDF(request)
-names(df_cid10) <- c("causabas", "capitulo_cid10", "causabas_categoria", "obitos")
+names(df_cid10) <- c("CAUSABAS", "capitulo_cid10", "causabas_categoria", "obitos")
 
 df_cid10 <- df_cid10 |>
   select(!obitos) |>
-  arrange(causabas)
+  arrange(CAUSABAS)
 
 
-## Obtendo um dataframe com as regiıes, UFs e nomes de cada municÌpio -------
+## Obtendo um dataframe com as regi√µes, UFs e nomes de cada munic√≠pio -------
 df_aux_municipios <- data.frame()
 params = paste0('{
       "token": {
         "token": "',token,'"
       },
       "sql": {
-        "sql": {"query":" SELECT res_codigo_adotado, res_SIGLA_UF, res_REGIAO, COUNT(1)',
-                ' FROM \\"datasus-sim\\"',
-                ' GROUP BY res_codigo_adotado, res_SIGLA_UF, res_REGIAO",
+        "sql": {"query":" SELECT res_codigo_adotado, res_MUNNOME, res_SIGLA_UF, res_REGIAO, COUNT(1)',
+                ' FROM \\"datasus-sinasc\\"',
+                ' GROUP BY res_codigo_adotado, res_MUNNOME, res_SIGLA_UF, res_REGIAO",
                         "fetch_size": 65000}
       }
     }')
 
 request <- POST(url = endpoint, body = params, encode = "form")
 df_aux_municipios <- convertRequestToDF(request)
-names(df_aux_municipios) <- c("codigo", "uf", "regiao", "obitos")
+names(df_aux_municipios) <- c("CODMUNRES", "res_MUNNOME", "res_SIGLA_UF", "res_REGIAO", "nascidos")
 
 df_aux_municipios <- df_aux_municipios |>
-  select(!obitos) |>
-  arrange(codigo)
+  select(!nascidos) |>
+  arrange(CODMUNRES)
 
 
-# Para a seÁ„o de Ûbitos maternos oficiais --------------------------------
-## Lendo o arquivo com os Ûbitos maternos de 1996 a 2021
-dados_obitos_maternos_1996_2021 <- read.csv("R/databases/Obitos_maternos_muni2021.csv") 
-
-## Baixando os dados preliminares do SIM de 2022 ---------------------------
-dados_preliminares_2022_aux <- fetch_datasus(
+# Baixando os dados preliminares do SIM de 2023 ---------------------------
+dados_preliminares_2022_aux1 <- fetch_datasus(
   year_start = 2022, 
-  year_end = 2022,
+  year_end = 2023,
   information_system = "SIM-DO"
-) |>
-  process_sim()
+) 
 
-dados_preliminares_2022 <- dados_preliminares_2022_aux |>
+## Por enquanto, o microdatasus s√≥ tem dados at√© 2022
+unique(substr(dados_preliminares_2022_aux1$DTOBITO, nchar(dados_preliminares_2022_aux1$DTOBITO) - 3, nchar(dados_preliminares_2022_aux1$DTOBITO)))
+
+## Lendo os dados preliminares de 2023, baixados do opendatasus
+dados_preliminares_2023_aux1 <- read.csv2("R/databases/DO23OPEN.csv")
+
+## Checando se as colunas s√£o as mesmas
+names(dados_preliminares_2023_aux1)[which(!(names(dados_preliminares_2023_aux1) %in% names(dados_preliminares_2022_aux1)))]
+names(dados_preliminares_2022_aux1)[which(!(names(dados_preliminares_2022_aux1) %in% names(dados_preliminares_2023_aux1)))]
+
+## Retirando as vari√°veis que n√£o batem
+dados_preliminares_2022_aux2 <- dados_preliminares_2022_aux1 |>
+  select(!c(ESTABDESCR, NUDIASOBIN, NUDIASINF, FONTESINF, CONTADOR)) 
+
+dados_preliminares_2023_aux2 <- dados_preliminares_2023_aux1 |>
+  select(!c(contador, OPOR_DO, TP_ALTERA, CB_ALT)) |>
+  mutate_if(is.numeric, as.character)
+
+## Juntando as duas bases
+dados_preliminares_2023_aux <- full_join(dados_preliminares_2022_aux2, dados_preliminares_2023_aux2)
+
+## Transformando algumas vari√°veis
+dados_preliminares_2023 <- left_join(dados_preliminares_2023_aux, df_aux_municipios) |>
+  # mutate(
+  #   SEXO = if_else(SEXO == "Feminino", 2, 1, missing = 0),
+  #   OBITOGRAV = case_when(
+  #     OBITOGRAV == "Sim" ~ 1,
+  #     OBITOGRAV == "N√£o" ~ 2,
+  #     OBITOGRAV == "Ignorado" | is.na(OBITOGRAV) ~ 9
+  #   ),
+  #   OBITOPUERP = case_when(
+  #     OBITOPUERP == "De 0 a 42 dias" ~ 1,
+  #     OBITOPUERP == "De 43 dias a 1 ano" ~ 2,
+  #     OBITOPUERP == "N√£o" ~ 3,
+#     OBITOPUERP == "Ignorado" | is.na(OBITOPUERP) ~ 9
+#   ),
+#   RACACOR = ifelse(is.na(RACACOR), "Ignorado", RACACOR),
+#   ESTCIV = ifelse(is.na(ESTCIV), "Ignorado", ESTCIV),
+#   ESC2010 = ifelse(is.na(ESC2010), 9, ESC2010),
+#   LOCOCOR = ifelse(is.na(LOCOCOR), "Ignorado", LOCOCOR),
+#   ASSISTMED = ifelse(is.na(ASSISTMED), "Ignorado", ASSISTMED),
+#   NECROPSIA = ifelse(is.na(NECROPSIA), "Ignorado", NECROPSIA),
+#   FONTEINV = ifelse(is.na(FONTEINV), "Ignorado", FONTEINV)
+# ) |>
   mutate(
-    SEXO = if_else(SEXO == "Feminino", 2, 1, missing = 0),
-    OBITOGRAV = case_when(
-      OBITOGRAV == "Sim" ~ 1,
-      OBITOGRAV == "N„o" ~ 2,
-      OBITOGRAV == "Ignorado" | is.na(OBITOGRAV) ~ 9
-    ),
-    OBITOPUERP = case_when(
-      OBITOPUERP == "De 0 a 42 dias" ~ 1,
-      OBITOPUERP == "De 43 dias a 1 ano" ~ 2,
-      OBITOPUERP == "N„o" ~ 3,
-      OBITOPUERP == "Ignorado" | is.na(OBITOPUERP) ~ 9
-    ),
-    RACACOR = ifelse(is.na(RACACOR), "Ignorado", RACACOR),
-    ESTCIV = ifelse(is.na(ESTCIV), "Ignorado", ESTCIV),
-    ESC2010 = ifelse(is.na(ESC2010), 9, ESC2010),
-    LOCOCOR = ifelse(is.na(LOCOCOR), "Ignorado", LOCOCOR),
-    ASSISTMED = ifelse(is.na(ASSISTMED), "Ignorado", ASSISTMED),
-    NECROPSIA = ifelse(is.na(NECROPSIA), "Ignorado", NECROPSIA),
-    FONTEINV = ifelse(is.na(FONTEINV), "Ignorado", FONTEINV)
+    CAUSABAS = ifelse(CAUSABAS == "O935", "O95", CAUSABAS),
+    OBITOGRAV = ifelse(is.na(OBITOGRAV), "9", OBITOGRAV),
+    OBITOPUERP = ifelse(is.na(OBITOPUERP), "9", OBITOPUERP)
   ) |>
   mutate(
-    ano = substr(DTOBITO, 1, 4),
+    ano = as.numeric(substr(DTOBITO, nchar(DTOBITO) - 3, nchar(DTOBITO))),
+    idade = as.numeric(
+      ifelse(
+        as.numeric(IDADE) >= 400 & as.numeric(IDADE) <= 499, 
+        substr(IDADE, 2, 3), 
+        ifelse(IDADE == "999" | is.na(IDADE), 99, 0)
+      )
+    ),
+    RACACOR = case_when(
+      RACACOR == "1" ~ "Branca",
+      RACACOR == "2" ~ "Preta",
+      RACACOR == "3" ~ "Amarela",
+      RACACOR == "4" ~ "Parda",
+      RACACOR == "5" ~ "Ind√≠gena",
+      is.na(RACACOR) ~ "Ignorado"
+    ),
     .keep = "unused",
     .after = CODMUNRES
   ) 
 
 
-df_maternos_preliminares <- dados_preliminares_2022 |>
+# Para a se√ß√£o de √≥bitos maternos oficiais --------------------------------
+## Lendo o arquivo com os √≥bitos maternos de 1996 a 2021
+dados_obitos_maternos_1996_2021 <- read.csv("R/databases/Obitos_maternos_muni2021.csv") 
+
+df_maternos_preliminares <- dados_preliminares_2023 |>
   filter(
-    SEXO == 2,
+    SEXO == "2",
     ((CAUSABAS >= "O000"  &  CAUSABAS <= "O959") |
        (CAUSABAS >= "O980"  &  CAUSABAS <= "O999") |
-       (CAUSABAS == "A34" & OBITOPUERP != 2) |
-       ((CAUSABAS >= "B200"  &  CAUSABAS <= "B249") & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
-       (CAUSABAS == "D392" & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
-       (CAUSABAS == "E230" & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
-       ((CAUSABAS >= "F530"  &  CAUSABAS <= "F539") & (OBITOPUERP != 2) |
-       (CAUSABAS == "M830" & OBITOPUERP != 2)))
+       (CAUSABAS == "A34" & OBITOPUERP != "2") |
+       ((CAUSABAS >= "B200"  &  CAUSABAS <= "B249") & (OBITOGRAV == "1" | OBITOPUERP == "1")) |
+       (CAUSABAS == "D392" & (OBITOGRAV == "1" | OBITOPUERP == "1")) |
+       (CAUSABAS == "E230" & (OBITOGRAV == "1" | OBITOPUERP == "1")) |
+       ((CAUSABAS >= "F530"  &  CAUSABAS <= "F539") & (OBITOPUERP != "2") |
+       (CAUSABAS == "M830" & OBITOPUERP != "2")))
   ) |>
-  select(munResNome, CODMUNRES, ano, CAUSABAS, OBITOGRAV, OBITOPUERP, RACACOR, IDADEanos, FONTEINV) |>
+  select(res_MUNNOME, CODMUNRES, ano, CAUSABAS, OBITOGRAV, OBITOPUERP, RACACOR, idade, FONTEINV) |>
   mutate(
     tipo_de_morte_materna = if_else(
       condition = (CAUSABAS >= "B200" & CAUSABAS <= "B249") |
@@ -137,26 +178,18 @@ df_maternos_preliminares <- dados_preliminares_2022 |>
         (CAUSABAS == "O94") |
         (CAUSABAS >= "O980" & CAUSABAS <= "O999"),
       true = "Indireta",
-      false = if_else(CAUSABAS == "O95", true = "N„o especificada", false = "Direta")
+      false = if_else(CAUSABAS == "O95", true = "N√£o especificada", false = "Direta")
     ),
     periodo_do_obito = case_when(
       OBITOGRAV == "1" & OBITOPUERP != "1" & OBITOPUERP != "2" ~ "Durante a gravidez, parto ou aborto",
-      OBITOGRAV != "1" & OBITOPUERP == "1" ~ "Durante o puerpÈrio, atÈ 42 dias",
-      OBITOGRAV != "1" & OBITOPUERP == "2" ~ "Durante o puerpÈrio, de 43 dias a menos de 1 ano",
-      (OBITOGRAV == "2" & OBITOPUERP == "3") | (OBITOGRAV == "2" & OBITOPUERP == "9") | (OBITOGRAV == "9" & OBITOPUERP == "3")  ~ "N„o na gravidez ou no puerpÈrio",
-      #OBITOGRAV == "2" & OBITOPUERP == "9" ~ "Durante o puerpÈrio, atÈ 1 ano, perÌodo n„o discriminado",
-      OBITOGRAV == "9" & OBITOPUERP == "9" ~ "N„o informado ou ignorado",
-      (OBITOGRAV == "1" & OBITOPUERP == "1") | (OBITOGRAV == "1" & OBITOPUERP == "2") ~ "PerÌodo inconsistente"),
+      OBITOGRAV != "1" & OBITOPUERP == "1" ~ "Durante o puerp√©rio, at√© 42 dias",
+      OBITOGRAV != "1" & OBITOPUERP == "2" ~ "Durante o puerp√©rio, de 43 dias a menos de 1 ano",
+      (OBITOGRAV == "2" & OBITOPUERP == "3") | (OBITOGRAV == "2" & OBITOPUERP == "9") | (OBITOGRAV == "9" & OBITOPUERP == "3")  ~ "N√£o na gravidez ou no puerp√©rio",
+      #OBITOGRAV == "2" & OBITOPUERP == "9" ~ "Durante o puerp√©rio, at√© 1 ano, per√≠odo N√£o discriminado",
+      (OBITOGRAV == "9") & (OBITOPUERP == "9") ~ "N√£o informado ou ignorado",
+      (OBITOGRAV == "1" & OBITOPUERP == "1") | (OBITOGRAV == "1" & OBITOPUERP == "2") ~ "Per√≠odo inconsistente"),
     .after = CAUSABAS,
-    investigacao_cmm = if_else(FONTEINV == "ComitÍ de Mortalidade Materna e/ou Infantil", true = "Sim", false = if_else(FONTEINV == "Ignorado", true = "Sem informaÁ„o", false = "N„o",  missing = "Sem informaÁ„o"), missing = "Sem informaÁ„o")
-  ) |>
-  select(!c(OBITOGRAV, OBITOPUERP, FONTEINV)) |>
-  rename(
-    municipio = munResNome,
-    codigo = CODMUNRES,
-    causabas = CAUSABAS,
-    racacor = RACACOR,
-    idade = IDADEanos
+    investigacao_cmm = if_else(FONTEINV == "1", true = "Sim", false = if_else(FONTEINV == "9", true = "Sem informa√ß√£o", false = "N√£o",  missing = "Sem informa√ß√£o"), missing = "Sem informa√ß√£o")
   ) |>
   mutate(obitos = 1) |>
   group_by(across(!obitos)) |>
@@ -165,10 +198,12 @@ df_maternos_preliminares <- dados_preliminares_2022 |>
   left_join(df_cid10) |>
   left_join(df_aux_municipios) |>
   select(
-    regiao, uf, municipio, codigo, ano, capitulo_cid10, causabas_categoria, 
-    tipo_de_morte_materna, periodo_do_obito, investigacao_cmm, racacor, idade, obitos
+    regiao = res_REGIAO, uf = res_SIGLA_UF, municipio = res_MUNNOME, codigo = CODMUNRES,
+    ano, capitulo_cid10, causabas_categoria, tipo_de_morte_materna, periodo_do_obito, investigacao_cmm, 
+    RACACOR, idade, obitos
   ) |>
-  arrange(regiao, uf)
+  arrange(regiao, uf) |>
+  clean_names()
 
 df_maternos_preliminares$codigo <- as.numeric(df_maternos_preliminares$codigo)
 df_maternos_preliminares$ano <- as.numeric(df_maternos_preliminares$ano)
@@ -176,58 +211,51 @@ df_maternos_preliminares$idade <- as.numeric(df_maternos_preliminares$idade)
 
 
 ##Juntando as duas bases
-df_obitos_maternos <- full_join(
-  dados_obitos_maternos_1996_2021,
-  df_maternos_preliminares,
-  by = join_by(
-    regiao, uf, municipio, ano, capitulo_cid10, causabas_categoria, tipo_de_morte_materna, periodo_do_obito,
-    investigacao_cmm, racacor, idade, obitos
-  )
-)
+df_obitos_maternos <- full_join(dados_obitos_maternos_1996_2021, df_maternos_preliminares)
 
 ##Exportando os dados 
-write.table(df_obitos_maternos, 'dados_oobr_obitos_grav_puerp_maternos_oficiais_2022.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_obitos_maternos, 'dados_oobr_obitos_grav_puerp_maternos_oficiais_2023.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
-# Para a seÁ„o de an·lise cruzada -----------------------------------------
-##Lendo o arquivo com os Ûbitos maternos para a an·lise cruzada de 1996 a 2021
+# Para a se√ß√£o de an√°lise cruzada -----------------------------------------
+##Lendo o arquivo com os √≥bitos maternos para a an√°lise cruzada de 1996 a 2021
 dados_ac_1996_2021 <- read.csv("R/databases/Obitos_maternos_estendidos2021.csv") 
 
-##Nos dados preliminares, filtrando apenas pelos Ûbitos maternos
-df_ac_preliminares_aux <- dados_preliminares_2022 |>
+##Nos dados preliminares, filtrando apenas pelos √≥bitos maternos
+df_ac_preliminares_aux <- dados_preliminares_2023 |>
   filter(
-    SEXO == 2,
+    SEXO == "2",
     ((CAUSABAS >= "O000"  &  CAUSABAS <= "O959") |
        (CAUSABAS >= "O980"  &  CAUSABAS <= "O999") |
-       (CAUSABAS == "A34" & OBITOPUERP != 2) |
-       ((CAUSABAS >= "B200"  &  CAUSABAS <= "B249") & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
-       (CAUSABAS == "D392" & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
-       (CAUSABAS == "E230" & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
-       ((CAUSABAS >= "F530"  &  CAUSABAS <= "F539") & (OBITOPUERP != 2 | OBITOPUERP == " ")) |
-       (CAUSABAS == "M830" & OBITOPUERP != 2))
+       (CAUSABAS == "A34" & OBITOPUERP != "2") |
+       ((CAUSABAS >= "B200"  &  CAUSABAS <= "B249") & (OBITOGRAV == "1" | OBITOPUERP == "1")) |
+       (CAUSABAS == "D392" & (OBITOGRAV == "1" | OBITOPUERP == "1")) |
+       (CAUSABAS == "E230" & (OBITOGRAV == "1" | OBITOPUERP == "1")) |
+       ((CAUSABAS >= "F530"  &  CAUSABAS <= "F539") & (OBITOPUERP != "2" | OBITOPUERP == " ")) |
+       (CAUSABAS == "M830" & OBITOPUERP != "2"))
   ) |>
-  left_join(df_cid10, by = join_by(CAUSABAS == causabas)) |>
-  left_join(df_aux_municipios, by = join_by(CODMUNRES == codigo)) |>
-  select(regiao, uf, munResNome, CODMUNRES, ano, RACACOR, ESTCIV, ESC2010, LOCOCOR, IDADEanos, PESO, ASSISTMED, NECROPSIA, FONTEINV, CAUSABAS, capitulo_cid10, causabas_categoria, OBITOGRAV, OBITOPUERP)
+  left_join(df_cid10) |>
+  left_join(df_aux_municipios) |>
+  select(res_REGIAO, res_SIGLA_UF, res_MUNNOME, CODMUNRES, ano, RACACOR, ESTCIV, ESC2010, LOCOCOR, idade, PESO, ASSISTMED, NECROPSIA, FONTEINV, CAUSABAS, capitulo_cid10, causabas_categoria, OBITOGRAV, OBITOPUERP)
 
 colnames(df_ac_preliminares_aux) <- c("regiao", "uf", "municipio", "codigo", "ano_obito", "raca_cor", "est_civil", "escolaridade", "local_ocorrencia_obito", "idade_obito", "peso", "assistencia_med", "necropsia", "fonteinv", "causabas", "causabas_capitulo", "causabas_categoria", "obitograv", "obitopuerp")
 
-##Realizando os tratamentos necess·rios nos dados preliminares
+##Realizando os tratamentos necess√°rios nos dados preliminares
 df_ac_preliminares <- df_ac_preliminares_aux |>
   mutate(
     escolaridade = case_when(
       escolaridade == "0" ~ "Sem escolaridade",
       escolaridade == "1" ~ "Fundamental I",
       escolaridade == "2" ~ "Fundamental II",
-      escolaridade == "3" ~ "MÈdio",
+      escolaridade == "3" ~ "M√©dio",
       escolaridade == "4" ~ "Superior incompleto",
       escolaridade == "5" ~ "Superior completo",
-      escolaridade == "9" ~ "Ignorado"
+      escolaridade == "9" | is.na(escolaridade) ~ "Ignorado"
     ),
     obito_em_idade_fertil = if_else(
       condition = as.numeric(idade_obito) >= 10 & as.numeric(idade_obito) <= 49,
       true = "Sim",
-      false = "N„o"
+      false = "N√£o"
     ),
     tipo_de_morte_materna = if_else(
       condition = (causabas >= "B200" & causabas <= "B249") |
@@ -236,18 +264,18 @@ df_ac_preliminares <- df_ac_preliminares_aux |>
         (causabas == "O94") |
         (causabas >= "O980" & causabas <= "O999"),
       true = "Indireta",
-      false = if_else(causabas == "O95", true = "N„o especificada", false = "Direta")
+      false = if_else(causabas == "O95", true = "N√£o especificada", false = "Direta")
     ),
     periodo_do_obito = case_when(
       obitograv == "1" & obitopuerp != "1" & obitopuerp != "2" ~ "Durante a gravidez, parto ou aborto",
-      obitograv != "1" & obitopuerp == "1" ~ "Durante o puerpÈrio, atÈ 42 dias",
-      obitograv != "1" & obitopuerp == "2" ~ "Durante o puerpÈrio, de 43 dias a menos de 1 ano",
-      (obitograv == "2" & obitopuerp == "3") | (obitograv == "2" & obitopuerp == "9") | (obitograv == "9" & obitopuerp == "3")  ~ "N„o na gravidez ou no puerpÈrio",
-      #obitograv == "2" & obitopuerp == "9" ~ "Durante o puerpÈrio, atÈ 1 ano, perÌodo n„o discriminado",
-      obitograv == "9" & obitopuerp == "9" ~ "N„o informado ou ignorado",
-      (obitograv == "1" & obitopuerp == "1") | (obitograv == "1" & obitopuerp == "2") ~ "PerÌodo inconsistente"),
+      obitograv != "1" & obitopuerp == "1" ~ "Durante o puerp√©rio, at√© 42 dias",
+      obitograv != "1" & obitopuerp == "2" ~ "Durante o puerp√©rio, de 43 dias a menos de 1 ano",
+      (obitograv == "2" & obitopuerp == "3") | (obitograv == "2" & obitopuerp == "9") | (obitograv == "9" & obitopuerp == "3")  ~ "N√£o na gravidez ou no puerp√©rio",
+      #obitograv == "2" & obitopuerp == "9" ~ "Durante o puerp√©rio, at√© 1 ano, per√≠odo N√£o discriminado",
+      (obitograv == "9") & (obitopuerp == "9") ~ "N√£o informado ou ignorado",
+      (obitograv == "1" & obitopuerp == "1") | (obitograv == "1" & obitopuerp == "2") ~ "Per√≠odo inconsistente"),
     .after = causabas_categoria,
-    investigacao_cmm = if_else(fonteinv == "1", true = "Sim", false = if_else(fonteinv == "9", true = "Sem informaÁ„o", false = "N„o",  missing = "Sem informaÁ„o"), missing = "Sem informaÁ„o")
+    investigacao_cmm = if_else(fonteinv == "1", true = "Sim", false = if_else(fonteinv == "9", true = "Sem informa√ß√£o", false = "N√£o",  missing = "Sem informa√ß√£o"), missing = "Sem informa√ß√£o")
   ) |> 
   select(!c(codigo, causabas, obitograv, obitopuerp, fonteinv)) 
 
@@ -263,30 +291,33 @@ df_obitos_maternos_ac <- full_join(
 )
 
 ##Exportando os dados 
-write.table(df_obitos_maternos_ac, 'dados_oobr_obitos_grav_puerp_analise_cruzada_2022.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_obitos_maternos_ac, 'dados_oobr_obitos_grav_puerp_analise_cruzada_2023.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
-# Para a seÁ„o de Ûbitos maternos desconsiderados -------------------------
-##Lendo o arquivo com os Ûbitos de gestantes e puÈrperas desconsiderados de 1996 a 2021
+# Para a se√ß√£o de √≥bitos maternos desconsiderados -------------------------
+##Lendo o arquivo com os √≥bitos de gestantes e pu√©rperas desconsiderados de 1996 a 2021
 dados_desconsiderados_1996_2021 <- read.csv("R/databases/Obitos_desconsiderados_muni2021.csv") 
 
-##Nos dados preliminares, filtrando apenas pelos Ûbitos de gestantes e puÈrperas desconsiderados
-df_descons_preliminares_aux <- dados_preliminares_2022 |>
+##Nos dados preliminares, filtrando apenas pelos √≥bitos de gestantes e pu√©rperas desconsiderados
+df_descons_preliminares_aux <- dados_preliminares_2023 |>
   filter(
-    SEXO == 2,
-    OBITOGRAV == 1 | OBITOPUERP == 1 | OBITOPUERP == 2,
+    SEXO == "2",
+    OBITOGRAV == "1" | OBITOPUERP == "1" | OBITOPUERP == "2",
     !((CAUSABAS >= "O000"  &  CAUSABAS <= "O959") |
         (CAUSABAS >= "O980"  &  CAUSABAS <= "O999") |
-        (CAUSABAS == "A34" & OBITOPUERP != 2) |
-        ((CAUSABAS >= "B200"  &  CAUSABAS <= "B249") & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
-        (CAUSABAS == "D392" & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
-        (CAUSABAS == "E230" & (OBITOGRAV == 1 | OBITOPUERP == 1)) |
-        ((CAUSABAS >= "F530"  &  CAUSABAS <= "F539") & (OBITOPUERP != 2)) |
-        (CAUSABAS == "M830" & OBITOPUERP != 2))
+        (CAUSABAS == "A34" & OBITOPUERP != "2") |
+        ((CAUSABAS >= "B200"  &  CAUSABAS <= "B249") & (OBITOGRAV == "1" | OBITOPUERP == "1")) |
+        (CAUSABAS == "D392" & (OBITOGRAV == "1" | OBITOPUERP == "1")) |
+        (CAUSABAS == "E230" & (OBITOGRAV == "1" | OBITOPUERP == "1")) |
+        ((CAUSABAS >= "F530"  &  CAUSABAS <= "F539") & (OBITOPUERP != "2")) |
+        (CAUSABAS == "M830" & OBITOPUERP != "2"))
   ) |>
-  left_join(df_cid10, by = join_by(CAUSABAS == causabas)) |>
-  left_join(df_aux_municipios, by = join_by(CODMUNRES == codigo)) |>
-  select(regiao, uf, munResNome, CODMUNRES, ano, CAUSABAS, capitulo_cid10, causabas_categoria, OBITOGRAV, OBITOPUERP, RACACOR, IDADEanos, FONTEINV) |>
+  left_join(df_cid10) |>
+  left_join(df_aux_municipios) |>
+  select(
+    regiao = res_REGIAO, uf = res_SIGLA_UF, municipio = res_MUNNOME, CODMUNRES, ano, CAUSABAS,
+    capitulo_cid10, causabas_categoria, OBITOGRAV, OBITOPUERP, RACACOR, idade, FONTEINV
+  ) |>
   mutate(obitos = 1) |>
   group_by(across(!obitos)) |>
   summarise(obitos = sum(obitos)) |>
@@ -294,17 +325,17 @@ df_descons_preliminares_aux <- dados_preliminares_2022 |>
 
 colnames(df_descons_preliminares_aux) <- c("regiao", "uf", "municipio", "codigo", "ano", "causabas", "capitulo_cid10", "causabas_categoria", "obitograv", "obitopuerp", "racacor", "idade", "fonteinv", "obitos")
 
-##Realizando os tratamentos necess·rios nos dados preliminares
+##Realizando os tratamentos necess√°rios nos dados preliminares
 df_descons_preliminares_aux <- df_descons_preliminares_aux |>
   mutate(
     periodo_do_obito = case_when(
       obitograv == "1" & obitopuerp != "1" & obitopuerp != "2" ~ "Durante a gravidez, parto ou aborto",
-      obitograv != "1" & obitopuerp == "1" ~ "Durante o puerpÈrio, atÈ 42 dias",
-      obitograv != "1" & obitopuerp == "2" ~ "Durante o puerpÈrio, de 43 dias a menos de 1 ano",
-      (obitograv == "1" & obitopuerp == "1") | (obitograv == "1" & obitopuerp == "2") ~ "PerÌodo inconsistente"
+      obitograv != "1" & obitopuerp == "1" ~ "Durante o puerp√©rio, at√© 42 dias",
+      obitograv != "1" & obitopuerp == "2" ~ "Durante o puerp√©rio, de 43 dias a menos de 1 ano",
+      (obitograv == "1" & obitopuerp == "1") | (obitograv == "1" & obitopuerp == "2") ~ "Per√≠odo inconsistente"
     ),
     .after = causabas_categoria,
-    investigacao_cmm = if_else(fonteinv == "1", true = "Sim", false = if_else(fonteinv == "9", true = "Sem informaÁ„o", false = "N„o",  missing = "Sem informaÁ„o"), missing = "Sem informaÁ„o")
+    investigacao_cmm = if_else(fonteinv == "1", true = "Sim", false = if_else(fonteinv == "9", true = "Sem informa√ß√£o", false = "N√£o",  missing = "Sem informa√ß√£o"), missing = "Sem informa√ß√£o")
   ) |> 
   select(!c(codigo, causabas, obitograv, obitopuerp, fonteinv)) |>
   group_by(across(!obitos)) |>
@@ -317,18 +348,14 @@ df_descons_preliminares_aux$ano <- as.numeric(df_descons_preliminares_aux$ano)
 ##Juntando as duas bases
 df_obitos_desconsiderados <- full_join(
   dados_desconsiderados_1996_2021,
-  df_descons_preliminares_aux,
-  by = join_by(
-    regiao, uf, municipio, ano, capitulo_cid10, causabas_categoria, periodo_do_obito, investigacao_cmm, racacor, idade,
-    obitos
-  )
+  df_descons_preliminares_aux
 )
 
 ##Exportando os dados 
-write.table(df_obitos_desconsiderados, 'dados_oobr_obitos_grav_puerp_desconsiderados_2022.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_obitos_desconsiderados, 'dados_oobr_obitos_grav_puerp_desconsiderados_2023.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
-# Para a seÁ„o de Ûbitos maternos por UF ----------------------------------
+# Para a se√ß√£o de √≥bitos maternos por UF ----------------------------------
 df_obitos_desc_uf <- df_obitos_desconsiderados |>
   clean_names() |>
   mutate(
@@ -359,7 +386,7 @@ df_obitos_uf[is.na(df_obitos_uf)] <- 0
 df_obitos_uf$idade <- as.numeric(df_obitos_uf$idade)
 
 ##Exportando os dados
-write.table(df_obitos_uf, 'dados_oobr_obitos_grav_puerp_ufs_2022.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_obitos_uf, 'dados_oobr_obitos_grav_puerp_ufs_2023.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
 
