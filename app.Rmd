@@ -114,11 +114,11 @@ Conta com **pesquisadores** da <a href = https://www.ufes.br target = _blank> Un
 
 <h3><span style = "font-weight: bold;">Os dados</span></h3>
 
-São providos do DATASUS do Ministério da Saúde e formam um grande banco anual composto por todos os registros das declarações de óbitos a partir do ano de 1996. Nessa plataforma, os dados do SIM são previamente tratados pela PCDaS com base no fluxo ETL (_Extract_, _Transform_ e _Load_). Atualmente, a PCDaS disponibiliza dados do SIM até 2023 **(sendo estes e os de 2022 preliminares)**, atualizados na última sexta feira de cada mês, tendo a última atualização ocorrido em 04 de dezembro de 2023. Os dados podem ser acessados em: Herzog, R. S.; Francisco, R. P. V.; Rodrigues, A. S.  Óbitos de gestantes e puérperas [banco de dados], 2022, Observatório Obstétrico Brasileiro (OOBr). Disponível em DOI: https://doi.org/10.7303/syn42902915.
+São providos do DATASUS do Ministério da Saúde e formam um grande banco anual composto por todos os registros das declarações de óbitos a partir do ano de 1996. Nessa plataforma, os dados do SIM são previamente tratados pela PCDaS com base no fluxo ETL (_Extract_, _Transform_ e _Load_). Atualmente, a PCDaS disponibiliza dados do SIM até 2023 **(sendo estes preliminares)**, atualizados na última sexta feira de cada mês, tendo a última atualização ocorrido em 17 de janeiro de 2024. Os dados podem ser acessados em: Herzog, R. S.; Francisco, R. P. V.; Rodrigues, A. S.  Óbitos de gestantes e puérperas [banco de dados], 2024, Observatório Obstétrico Brasileiro (OOBr). Disponível em DOI: https://doi.org/10.7303/syn42902915.
 
 <h3><span style = "font-weight: bold;">Como citar esse painel</span></h3>
 
-Observatório Obstétrico Brasileiro. OOBr Óbitos de Gestantes e Puérperas, 2022. Disponível em  https://observatorioobstetrico.shinyapps.io/obitos-grav-puerp. DOI: https://doi.org/10.7303/syn44144271.
+Observatório Obstétrico Brasileiro. OOBr Óbitos de Gestantes e Puérperas, 2024. Disponível em  https://observatorioobstetrico.shinyapps.io/obitos-grav-puerp. DOI: https://doi.org/10.7303/syn44144271.
 
 <h3><span style = "font-weight: bold;">Contato</span></h3>
 
@@ -174,7 +174,7 @@ Inputs {.sidebar data-width=350 style="width: 350px; visibility: visible; top: 7
 ------------------------------------- 
 ```{r input-obitosM}
 hr();h5(span("Óbitos maternos oficiais", style = "font-weight: bold;")); hr()
-p(em("Obs.: os dados de 2022 e 2023 são preliminares."))
+p(em("Obs.: os dados de 2023 são preliminares."))
 
 hr()
 span("Temporalidade e localidade", style = "font-weight: bold; font-size: 17px")
@@ -524,7 +524,7 @@ Inputs {.sidebar data-width=350 style="width: 350px; visibility: visible; top: 7
 ------------------------------------- 
 ```{r input-obitosNM}
 hr(); h5(span("Óbitos de gestantes e puérperas não considerados", style = "font-weight: bold;")); hr()
-p(em("Obs.: os dados de 2022 e 2023 são preliminares."))
+p(em("Obs.: os dados de 2023 são preliminares."))
 
 hr()
 span("Temporalidade e localidade", style = "font-weight: bold; font-size: 17px")
@@ -855,7 +855,7 @@ Inputs {.sidebar data-width=350 style="width: 350px; visibility: visible; top: 7
 ------------------------------------- 
 ```{r input-obitosUF}
 hr(); h5(span("Óbitos de gestantes e puérperas por estado", style = "font-weight: bold;")); hr()
-p(em("Obs.: os dados de 2022 e 2023 são preliminares."))
+p(em("Obs.: os dados de 2023 são preliminares."))
 
 numericInput(
   inputId = "selectAnoUF",
@@ -990,7 +990,7 @@ Inputs {.sidebar data-width=350 style="width: 350px; visibility: visible; top: 7
 ------------------------------------- 
 ```{r input-analiseCruzada}
 hr(); h5(span("Análise cruzada", style = "font-weight: bold;")); hr()
-p(em("Obs.: os dados de 2022 e 2023 são preliminares."))
+p(em("Obs.: os dados de 2023 são preliminares."))
 
 hr()
 span("Temporalidade e localidade", style = "font-weight: bold; font-size: 17px")
