@@ -5,9 +5,16 @@ account: observatorioobstetrico
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 6626033
+<<<<<<< HEAD
 bundleId: 8312770
 url: https://observatorioobstetrico.shinyapps.io/obitos-grav-puerp/
 when: 1709226303.67036
 lastSyncTime: 1709226303.67037
+=======
+bundleId: 8007847
+url: https://observatorioobstetrico.shinyapps.io/obitos-grav-puerp/
+when: 1701740216.03218
+lastSyncTime: 1701740216.03219
+>>>>>>> 5b746ae11ea4b0d5a75df133390079a7921c4936
 asMultiple: FALSE
 asStatic: FALSE
