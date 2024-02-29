@@ -67,20 +67,21 @@ library(gt)
 
 
 #Carregando os arquivos necessários
-dados_obitos_maternos <- read_delim("dados_oobr_obitos_grav_puerp_maternos_oficiais_2022.csv", 
+dados_obitos_maternos <- read_delim("dados_oobr_obitos_grav_puerp_maternos_oficiais_2023.csv", 
                                     delim = ",", escape_double = FALSE, trim_ws = TRUE) |>
   clean_names()
 
-dados_obitos_maternos_estendido <- read_delim("dados_oobr_obitos_grav_puerp_analise_cruzada_2022.csv", 
+dados_obitos_maternos_estendido <- read_delim("dados_oobr_obitos_grav_puerp_analise_cruzada_2023.csv", 
                                     delim = ",", escape_double = FALSE, trim_ws = TRUE) |>
   clean_names()
 
-dados_obitos_desconsiderados <- read_delim("dados_oobr_obitos_grav_puerp_desconsiderados_2022.csv", 
+dados_obitos_desconsiderados <- read_delim("dados_oobr_obitos_grav_puerp_desconsiderados_2023.csv", 
                                            delim = ",", escape_double = FALSE, trim_ws = TRUE) |>
   clean_names()
 
-dados_obitos_por_uf <- read_delim("dados_oobr_obitos_grav_puerp_ufs_2022.csv", 
-                                              delim = ",", escape_double = FALSE, trim_ws = TRUE) 
+dados_obitos_por_uf <- read_delim("dados_oobr_obitos_grav_puerp_ufs_2023.csv", 
+                                           delim = ",", escape_double = FALSE, trim_ws = TRUE) |>
+  clean_names()
 
 tabela_aux_municipios <- read_delim("tabela_auxiliar_municipios.csv", 
                                               delim = ",", escape_double = FALSE, trim_ws = TRUE) 
@@ -103,7 +104,7 @@ Sobre
 
 <h3><span style = "font-weight: bold;">O OOBr Óbitos de Gestantes e Puérperas</span></h3>
 
-É um painel de visualização dinâmico com análises acerca da mortalidade de gestantes e puérperas no Brasil, sob a perspectiva de algumas variáveis da base de dados do Sistema de Informações sobre Mortalidade (SIM). As informações consideradas são referentes aos registros de óbitos de mulheres gestantes ou puérperas dos anos de 1996 a 2022. 
+É um painel de visualização dinâmico com análises acerca da mortalidade de gestantes e puérperas no Brasil, sob a perspectiva de algumas variáveis da base de dados do Sistema de Informações sobre Mortalidade (SIM). As informações consideradas são referentes aos registros de óbitos de mulheres gestantes ou puérperas dos anos de 1996 a 2023. 
 
 <h3><span style = "font-weight: bold;">O Observatório Obstétrico Brasileiro (OOBr)</span></h3>
 
@@ -113,7 +114,7 @@ Conta com **pesquisadores** da <a href = https://www.ufes.br target = _blank> Un
 
 <h3><span style = "font-weight: bold;">Os dados</span></h3>
 
-São providos do DATASUS do Ministério da Saúde e formam um grande banco anual composto por todos os registros das declarações de óbitos a partir do ano de 1996. Nessa plataforma, os dados do SIM são previamente tratados pela PCDaS com base no fluxo ETL (_Extract_, _Transform_ e _Load_). Atualmente, a PCDaS disponibiliza dados do SIM até 2022 **(sendo estes preliminares)**, atualizados na última sexta feira de cada mês, tendo a última atualização ocorrido em 29 de setembro de 2023. Os dados podem ser acessados em: Herzog, R. S.; Francisco, R. P. V.; Rodrigues, A. S.  Óbitos de gestantes e puérperas [banco de dados], 2022, Observatório Obstétrico Brasileiro (OOBr). Disponível em DOI: https://doi.org/10.7303/syn42902915.
+São providos do DATASUS do Ministério da Saúde e formam um grande banco anual composto por todos os registros das declarações de óbitos (o SIM) que está disponível a partir do ano de 1996. Atualmente, os dados do SIM estão disponíveis até 2023 **(sendo estes preliminares)**, sendo os dados deste painel atualizados na última sexta feira de cada mês, com a última atualização tendo ocorrido em 23 de fevereiro de 2024. Os dados podem ser acessados em: Herzog, R. S.; Francisco, R. P. V.; Rodrigues, A. S.  Óbitos de gestantes e puérperas [banco de dados], 2022, Observatório Obstétrico Brasileiro (OOBr). Disponível em DOI: https://doi.org/10.7303/syn42902915.
 
 <h3><span style = "font-weight: bold;">Como citar esse painel</span></h3>
 
@@ -173,7 +174,7 @@ Inputs {.sidebar data-width=350 style="width: 350px; visibility: visible; top: 7
 ------------------------------------- 
 ```{r input-obitosM}
 hr();h5(span("Óbitos maternos oficiais", style = "font-weight: bold;")); hr()
-p(em("Obs.: os dados de 2022 são preliminares."))
+p(em("Obs.: os dados de 2023 são preliminares."))
 
 hr()
 span("Temporalidade e localidade", style = "font-weight: bold; font-size: 17px")
@@ -182,7 +183,7 @@ HTML("<span style='display: block; margin-bottom: 7px;'> </span>")
 numericInput(
   inputId = "selectAnoOM",
   label = HTML("<span class = 'negrito'> Selecione o ano de análise: </span>"),
-  value = "2022",
+  value = max(dados_obitos_maternos$ano),
   min = min(dados_obitos_maternos$ano),
   max = max(dados_obitos_maternos$ano)
 )
@@ -523,7 +524,7 @@ Inputs {.sidebar data-width=350 style="width: 350px; visibility: visible; top: 7
 ------------------------------------- 
 ```{r input-obitosNM}
 hr(); h5(span("Óbitos de gestantes e puérperas não considerados", style = "font-weight: bold;")); hr()
-p(em("Obs.: os dados de 2022 são preliminares."))
+p(em("Obs.: os dados de 2023 são preliminares."))
 
 hr()
 span("Temporalidade e localidade", style = "font-weight: bold; font-size: 17px")
@@ -532,7 +533,7 @@ HTML("<span style='display: block; margin-bottom: 7px;'> </span>")
 numericInput(
   inputId = "selectAnoONM",
   label = HTML("<span class = 'negrito'> Selecione o ano de análise: </span>"),
-  value = "2022",
+  value = max(dados_obitos_desconsiderados$ano),
   min = min(dados_obitos_desconsiderados$ano),
   max = max(dados_obitos_desconsiderados$ano)
 )
@@ -854,12 +855,12 @@ Inputs {.sidebar data-width=350 style="width: 350px; visibility: visible; top: 7
 ------------------------------------- 
 ```{r input-obitosUF}
 hr(); h5(span("Óbitos de gestantes e puérperas por estado", style = "font-weight: bold;")); hr()
-p(em("Obs.: os dados de 2022 são preliminares."))
+p(em("Obs.: os dados de 2023 são preliminares."))
 
 numericInput(
   inputId = "selectAnoUF",
   label = HTML("<span class = 'negrito'> Selecione o ano de análise: </span>"),
-  value = "2022",
+  value = max(dados_obitos_por_uf$ano),
   min = min(dados_obitos_por_uf$ano),
   max = max(dados_obitos_por_uf$ano)
 )
@@ -989,7 +990,7 @@ Inputs {.sidebar data-width=350 style="width: 350px; visibility: visible; top: 7
 ------------------------------------- 
 ```{r input-analiseCruzada}
 hr(); h5(span("Análise cruzada", style = "font-weight: bold;")); hr()
-p(em("Obs.: os dados de 2022 são preliminares."))
+p(em("Obs.: os dados de 2023 são preliminares."))
 
 hr()
 span("Temporalidade e localidade", style = "font-weight: bold; font-size: 17px")
@@ -998,9 +999,9 @@ HTML("<span style='display: block; margin-bottom: 7px;'> </span>")
 sliderInput(
   inputId = "selectAnoAC",
   label = HTML("<span class = 'negrito'> Selecione o(s) ano(s) de análise: </span>"),
-  value = c("2016", "2022"),
-  min = min(dados_obitos_maternos_estendido$ano_obito),
-  max = max(dados_obitos_maternos_estendido$ano_obito),
+  value = c("2016", max(dados_obitos_maternos_estendido$ano)),
+  min = min(dados_obitos_maternos_estendido$ano),
+  max = max(dados_obitos_maternos_estendido$ano),
   sep = "",
 )
 
@@ -1072,8 +1073,8 @@ HTML("<span style='display: block; margin-bottom: 7px;'> </span>")
 
 variaveis <- c(
   "Região do país" = "regiao",
-  "Ano do óbito" = "ano_obito", 
-  "Raça/cor" = "raca_cor",
+  "Ano do óbito" = "ano", 
+  "Raça/cor" = "racacor",
   "Estado civil" = "est_civil", 
   "Escolaridade" = "escolaridade",
   "UF de residência" = "uf",
@@ -1083,7 +1084,7 @@ variaveis <- c(
   "Período do óbito" = "periodo_do_obito",
   "Assistência médica" = "assistencia_med",
   "Necrópsia" = "necropsia",
-  "Capítulo da CID-10" = "causabas_capitulo",
+  "Capítulo da CID-10" = "capitulo_cid10",
   "Investigação por CMM" = "investigacao_cmm"
 )
 
@@ -1092,14 +1093,14 @@ selectInput(
   inputId = "selectVarLinhaAC",
   label = HTML("<span class = 'negrito'> Selecione a variável da linha: </span>"),
   choices = sort(variaveis),
-  selected = "raca_cor"
+  selected = "racacor"
 )
 
 selectInput(
   inputId = "selectVarColunaAC",
   label = HTML("<span class = 'negrito'> Selecione a variável da coluna: </span>"),
   choices = sort(variaveis),
-  selected = "ano_obito"
+  selected = "ano"
 )
 
 radioButtons(
@@ -1114,23 +1115,23 @@ observeEvent(input$selectNivelAC, {
     updateSelectInput(
         inputId = "selectVarLinhaAC",
         choices = sort(variaveis[-c(which(variaveis == "regiao"), which(variaveis == "uf"))]),
-        selected = "raca_cor"
+        selected = "racacor"
     )
     updateSelectInput(
       inputId = "selectVarColunaAC",
       choices = sort(variaveis[-c(which(variaveis == "regiao"), which(variaveis == "uf"))]),
-      selected = "ano_obito"
+      selected = "ano"
     )
   } else {
     updateSelectInput(
       inputId = "selectVarLinhaAC",
       choices = sort(variaveis),
-      selected = "raca_cor"
+      selected = "racacor"
     )
     updateSelectInput(
       inputId = "selectVarColunaAC",
       choices = sort(variaveis),
-      selected = "ano_obito"
+      selected = "ano"
     )
   }
 })
@@ -1151,8 +1152,8 @@ sliderInput(
 checkboxGroupInput(
   inputId = "selectRacaAC",
   label = HTML("<span class = 'negrito'> Selecione a raça/cor da gestante ou puérpera: </span>"),
-  choices = sort(unique(dados_obitos_maternos_estendido$raca_cor)),
-  selected = sort(unique(dados_obitos_maternos_estendido$raca_cor))
+  choices = sort(unique(dados_obitos_maternos_estendido$racacor)),
+  selected = sort(unique(dados_obitos_maternos_estendido$racacor))
 )
 
 checkboxGroupInput(
@@ -1210,11 +1211,11 @@ dados_analise_cruzada <- reactive({
   )
   dados_obitos_maternos_estendido |>
     filter(
-      ano_obito >= input$selectAnoAC[1] & ano_obito <= input$selectAnoAC[2],
+      ano >= input$selectAnoAC[1] & ano <= input$selectAnoAC[2],
       tipo_de_morte_materna %in% input$selectCausasAC,
       periodo_do_obito %in% input$selectPeriodoAC,
-      raca_cor %in% input$selectRacaAC,
-      idade_obito >= input$selectIdadeAC[1] & idade_obito <= input$selectIdadeAC[2]
+      racacor %in% input$selectRacaAC,
+      idade >= input$selectIdadeAC[1] & idade <= input$selectIdadeAC[2]
     ) |>
     mutate(
       obitos = 1
@@ -1277,12 +1278,12 @@ Row
 tbl_cross_ex1 <- reactive({
   dados_obitos_maternos_estendido |>
     filter(
-      ano_obito >= input$selectAnoAC[1] & ano_obito <= input$selectAnoAC[2],
+      ano >= input$selectAnoAC[1] & ano <= input$selectAnoAC[2],
       tipo_de_morte_materna %in% input$selectCausasAC,
       periodo_do_obito %in% input$selectPeriodoAC,
       investigacao_cmm %in% input$selectInvestigacaoAC,
-      raca_cor %in% input$selectRacaAC,
-      idade_obito >= input$selectIdadeAC[1] & idade_obito <= input$selectIdadeAC[2]
+      racacor %in% input$selectRacaAC,
+      idade >= input$selectIdadeAC[1] & idade <= input$selectIdadeAC[2]
     ) |>
     filter(
       if (input$selectNivelAC == "Nacional")
@@ -1324,5 +1325,3 @@ height = "100%", width = "100%"
 
 )
 ```
-
-

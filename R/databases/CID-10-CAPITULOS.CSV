@@ -1,0 +1,23 @@
+﻿CATINIC;CATFIM;DESCRICAO
+A00;B99;Capítulo I - Algumas doenças infecciosas e parasitárias
+C00;D48;Capítulo II - Neoplasias [tumores]
+D50;D89;Capítulo III  - Doenças do sangue e dos órgãos hematopoéticos e alguns transtornos imunitários
+E00;E90;Capítulo IV - Doenças endócrinas, nutricionais e metabólicas
+F00;F99;Capítulo V - Transtornos mentais e comportamentais
+G00;G99;Capítulo VI - Doenças do sistema nervoso
+H00;H59;Capítulo VII - Doenças do olho e anexos
+H60;H95;Capítulo VIII - Doenças do ouvido e da apófise mastóide
+I00;I99;Capítulo IX - Doenças do aparelho circulatório
+J00;J99;Capítulo X - Doenças do aparelho respiratório
+K00;K93;Capítulo XI - Doenças do aparelho digestivo
+L00;L99;Capítulo XII - Doenças da pele e do tecido subcutâneo
+M00;M99;Capítulo XIII - Doenças do sistema osteomuscular e do tecido conjuntivo
+N00;N99;Capítulo XIV - Doenças do aparelho geniturinário
+O00;O99;Capítulo XV - Gravidez, parto e puerpério
+P00;P96;Capítulo XVI - Algumas afecções originadas no período perinatal
+Q00;Q99;Capítulo XVII - Malformações congênitas, deformidades e anomalias cromossômicas
+R00;R99;Capítulo XVIII - Sintomas, sinais e achados anormais de exames clínicos e de laboratório, não classificados em outra parte
+S00;T98;Capítulo XIX - Lesões, envenenamento e algumas outras conseqüências de causas externas
+V01;Y98;Capítulo XX - Causas externas de morbidade e de mortalidade
+Z00;Z99;Capítulo XXI - Fatores que influenciam o estado de saúde e o contato com os serviços de saúde
+U04;U99;Capítulo XXII - Códigos para propósitos especiais
