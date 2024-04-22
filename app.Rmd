@@ -67,23 +67,23 @@ library(gt)
 
 
 #Carregando os arquivos necessários
-dados_obitos_maternos <- read_delim("dados_oobr_obitos_grav_puerp_maternos_oficiais_2023.csv", 
+dados_obitos_maternos <- read_delim("dados_oobr_obitos_grav_puerp_maternos_oficiais_1996_2023.csv", 
                                     delim = ",", escape_double = FALSE, trim_ws = TRUE) |>
   clean_names()
 
-dados_obitos_maternos_estendido <- read_delim("dados_oobr_obitos_grav_puerp_analise_cruzada_2023.csv", 
+dados_obitos_maternos_estendido <- read_delim("dados_oobr_obitos_grav_puerp_analise_cruzada_1996_2023.csv", 
                                     delim = ",", escape_double = FALSE, trim_ws = TRUE) |>
   clean_names()
 
-dados_obitos_desconsiderados <- read_delim("dados_oobr_obitos_grav_puerp_desconsiderados_2023.csv", 
+dados_obitos_desconsiderados <- read_delim("dados_oobr_obitos_grav_puerp_desconsiderados_1996_2023.csv", 
                                            delim = ",", escape_double = FALSE, trim_ws = TRUE) |>
   clean_names()
 
-dados_obitos_por_uf <- read_delim("dados_oobr_obitos_grav_puerp_ufs_2023.csv", 
+dados_obitos_por_uf <- read_delim("dados_oobr_obitos_grav_puerp_ufs_1996_2023.csv", 
                                            delim = ",", escape_double = FALSE, trim_ws = TRUE) |>
   clean_names()
 
-dados_garbage_codes <- read_delim("dados_oobr_obitos_grav_puerp_garbage_codes_2023.csv", 
+dados_garbage_codes <- read_delim("dados_oobr_obitos_grav_puerp_garbage_codes_1996_2023.csv", 
                                            delim = ",", escape_double = FALSE, trim_ws = TRUE) |>
   clean_names()
 

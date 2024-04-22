@@ -156,7 +156,7 @@ df_maternos_preliminares[is.na(df_maternos_preliminares), ]
 df_obitos_maternos <- full_join(dados_obitos_maternos_1996_2022, df_maternos_preliminares)
 
 ## Exportando os dados -----------------------------------------------------
-write.table(df_obitos_maternos, 'dados_oobr_obitos_grav_puerp_maternos_oficiais_2023.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_obitos_maternos, 'dados_oobr_obitos_grav_puerp_maternos_oficiais_1996_2023.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
 # Para a seção de garbage codes -------------------------------------------
@@ -175,7 +175,7 @@ df_maternos_garbage_codes_preliminares <- df_maternos_preliminares |>
 df_maternos_garbage_codes <- full_join(dados_garbage_codes_1996_2022, df_maternos_garbage_codes_preliminares)
 
 ## Exportando os dados -----------------------------------------------------
-write.table(df_maternos_garbage_codes, 'dados_oobr_obitos_grav_puerp_garbage_codes_2023.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_maternos_garbage_codes, 'dados_oobr_obitos_grav_puerp_garbage_codes_1996_2023.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
 # Para a seção de análise cruzada -----------------------------------------
@@ -209,7 +209,7 @@ df_ac_preliminares[is.na(df_ac_preliminares), ]
 df_obitos_maternos_ac <- full_join(dados_ac_1996_2022, df_ac_preliminares)
 
 ##Exportando os dados 
-write.table(df_obitos_maternos_ac, 'dados_oobr_obitos_grav_puerp_analise_cruzada_2023.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_obitos_maternos_ac, 'dados_oobr_obitos_grav_puerp_analise_cruzada_1996_2023.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
 # Para a seção de óbitos maternos desconsiderados -------------------------
@@ -247,7 +247,7 @@ df_descons_preliminares[is.na(df_descons_preliminares), ]
 df_obitos_desconsiderados <- full_join(dados_desconsiderados_1996_2022, df_descons_preliminares)
 
 ##Exportando os dados 
-write.table(df_obitos_desconsiderados, 'dados_oobr_obitos_grav_puerp_desconsiderados_2023.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_obitos_desconsiderados, 'dados_oobr_obitos_grav_puerp_desconsiderados_1996_2023.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
 ## Para a seção de óbitos maternos por UF ----------------------------------
@@ -275,7 +275,7 @@ df_obitos_uf <- full_join(df_obitos_desc_uf, df_obitos_maternos_uf) |>
   select(1:4, 13, 5:12)
 
 ##Exportando os dados
-write.table(df_obitos_uf, 'dados_oobr_obitos_grav_puerp_ufs_2023.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_obitos_uf, 'dados_oobr_obitos_grav_puerp_ufs_1996_2023.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
 
