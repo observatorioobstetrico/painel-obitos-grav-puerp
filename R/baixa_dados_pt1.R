@@ -180,8 +180,9 @@ for (i in 1:length(ano1)) {
          (causabas == "M830" & obitopuerp != "2"))
     ) |>
     select(
-      codigo = res_codigo_adotado, ano, municipio, uf, regiao, racacor, est_civil, escolaridade, idade, 
-      local_ocorrencia_obito, assistencia_med, necropsia, investigacao_cmm, capitulo_cid10
+      codigo = res_codigo_adotado, municipio, uf, regiao, ano, racacor, est_civil, escolaridade, idade, 
+      local_ocorrencia_obito, assistencia_med, necropsia, tipo_de_morte_materna, periodo_do_obito,
+      obito_em_idade_fertil, investigacao_cmm, capitulo_cid10
     ) 
   
   
@@ -201,20 +202,19 @@ for (i in 1:length(ano1)) {
            (causabas == "M830" & obitopuerp != "2")))
     ) |>
     mutate(
-      codmunres = substr(codmunres, 1, 6),
-      obitos = 1
+      obitos = 1,
+      .keep = "unused",
     ) |>
-    select(!c(municipio, uf, regiao)) |>
-    left_join(df_aux_municipios) |>
-    left_join(df_cid10) |>
     select(
       codigo = res_codigo_adotado, ano, municipio, uf, regiao, capitulo_cid10, causabas_categoria,
       periodo_do_obito, racacor, idade, investigacao_cmm, obitos
     ) |>
     group_by(across(!obitos)) |>
     summarise(obitos = sum(obitos)) |>
-    ungroup() 
-
+    ungroup() |>
+    arrange(codigo)
+  
+    
   
   if (i == 1) {
     df_obitos_maternos_completo <- df_obitos_maternos
@@ -229,39 +229,6 @@ for (i in 1:length(ano1)) {
   }
   
   rm(df_sim_aux, df_sim)
-  
-  if (i == length(ano1)) {
-    ## Para a seção de óbitos maternos por UF ----------------------------------
-    df_obitos_desc_uf <- df_obitos_desconsiderados_completo |>
-      mutate(
-        var_auxiliar = if_else(condition = capitulo_cid10 %like% "^XX", true = 1, false = 0),
-        periodo_do_obito = if_else(condition = var_auxiliar == 0, 
-                                   true = paste("obitos_descons", tolower(periodo_do_obito), " ", "_exceto_ext"),
-                                   false = paste("obitos_descons", tolower(periodo_do_obito), " ", "_ext")
-        )
-      ) |>
-      group_by(uf, regiao, ano, periodo_do_obito, idade) |>
-      summarise(obitos = sum(as.numeric(obitos))) |>
-      ungroup() |>
-      spread(periodo_do_obito, obitos, fill = 0) |>
-      select(1:5, 7, 9, 11, 6, 8, 10, 12) |>
-      clean_names() 
-    
-    df_obitos_maternos_uf <- df_obitos_maternos_completo |>
-      group_by(uf, regiao, ano, idade) |>
-      summarise(obitos_maternos = sum(obitos)) |>
-      ungroup()
-    
-    df_obitos_uf <- full_join(df_obitos_desc_uf, df_obitos_maternos_uf) |>
-      select(1:4, 13, 5:12)
-    
-    ### Exportando os dados -----------------------------------------------------
-    write.csv(df_obitos_maternos_completo, 'R/databases/obitos_maternos_muni_1996_2022.csv', row.names = FALSE)
-    write.csv(df_maternos_garbage_codes_completo, 'R/databases/obitos_garbage_code_muni_1996_2022.csv', row.names = FALSE)
-    write.csv(df_obitos_maternos_ac_completo, 'R/databases/obitos_maternos_estendidos_1996_2022.csv', row.names = FALSE)
-    write.csv(df_obitos_desconsiderados_completo, 'R/databases/obitos_desconsiderados_muni_1996_2022.csv', row.names = FALSE)
-    write.table(df_obitos_uf, 'dados_oobr_obitos_grav_puerp_ufs_1996_2022.csv', sep = ",", dec = ".", row.names = FALSE)
-  }
 
 }
 

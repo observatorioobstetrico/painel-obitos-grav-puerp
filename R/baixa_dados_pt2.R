@@ -215,7 +215,7 @@ write.table(df_obitos_maternos_ac, 'dados_oobr_obitos_grav_puerp_analise_cruzada
 # Para a seção de óbitos maternos desconsiderados -------------------------
 ## Lendo o arquivo com os óbitos desconsiderados de 1996 a 2022 -----------
 dados_desconsiderados_1996_2022 <- read.csv("R/databases/obitos_desconsiderados_muni_1996_2022.csv") |>
-  mutate(codigo = as.character(codigo))
+  mutate(codigo = as.character(codigo)) 
 
 ## Filtrando, nos dados preliminares, apenas pelos óbitos descons. --------
 df_descons_preliminares <- dados_preliminares_2023 |>
@@ -272,7 +272,8 @@ df_obitos_maternos_uf <- df_obitos_maternos |>
   ungroup()
 
 df_obitos_uf <- full_join(df_obitos_desc_uf, df_obitos_maternos_uf) |>
-  select(1:4, 13, 5:12)
+  select(1:4, 13, 5:12) |>
+  mutate(across(starts_with("obitos"), ~ifelse(is.na(.), 0, .)))
 
 ##Exportando os dados
 write.table(df_obitos_uf, 'dados_oobr_obitos_grav_puerp_ufs_1996_2023.csv', sep = ",", dec = ".", row.names = FALSE)
