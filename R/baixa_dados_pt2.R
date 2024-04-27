@@ -21,6 +21,8 @@ download.file("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/Mortalid
 dados_preliminares_2023_aux <- read.csv2("R/databases/DO23OPEN.csv") |> 
   clean_names()
 
+file.remove("R/databases/DO23OPEN.csv")
+
 ## Fazendo as manipulações necessárias ------------------------------------
 dados_preliminares_2023 <- dados_preliminares_2023_aux |>
   mutate_if(is.numeric, as.character) |>
