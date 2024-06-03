@@ -16,9 +16,9 @@ df_aux_municipios <- read.csv("R/databases/df_aux_municipios.csv") |>
 
 
 # Baixando os dados preliminares do SIM de 2023 ---------------------------
-download.file("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/Mortalidade_Geral_2023.csv", "R/databases/DO23OPEN.csv", mode = "wb")
+download.file("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/DO23OPEN.csv", "R/databases/DO23OPEN.csv", mode = "wb")
 
-dados_preliminares_2023_aux <- read.csv2("R/databases/DO23OPEN.csv") |> 
+dados_preliminares_2023_aux <- fread("R/databases/DO23OPEN.csv", sep = ";") |> 
   clean_names()
 
 file.remove("R/databases/DO23OPEN.csv")
@@ -205,7 +205,7 @@ df_ac_preliminares <- dados_preliminares_2023 |>
   ) 
 
 nrow(df_ac_preliminares[which(df_ac_preliminares$ano == 2023), ])
-df_ac_preliminares[is.na(df_ac_preliminares), ]
+as.data.frame(df_ac_preliminares)[is.na(as.data.frame(df_ac_preliminares)), ]
 
 ##Juntando as duas bases
 df_obitos_maternos_ac <- full_join(dados_ac_1996_2022, df_ac_preliminares)

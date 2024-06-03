@@ -118,7 +118,7 @@ Conta com **pesquisadores** da <a href = https://www.ufes.br target = _blank> Un
 
 <h3><span style = "font-weight: bold;">Os dados</span></h3>
 
-São providos do DATASUS do Ministério da Saúde e formam um grande banco anual composto por todos os registros das declarações de óbitos (o SIM) que está disponível a partir do ano de 1996. Atualmente, os dados do SIM estão disponíveis até 2023 **(sendo estes preliminares)**. Os dados deste painel são atualizados na última sexta feira de cada mês, com a última atualização tendo ocorrido em 26 de abril de 2024. Os dados podem ser acessados em: Herzog, R. S.; Francisco, R. P. V.; Rodrigues, A. S.  Óbitos de gestantes e puérperas [banco de dados], 2022, Observatório Obstétrico Brasileiro (OOBr). Disponível em DOI: https://doi.org/10.7303/syn42902915.
+São providos do DATASUS do Ministério da Saúde e formam um grande banco anual composto por todos os registros das declarações de óbitos (o SIM) que está disponível a partir do ano de 1996. Atualmente, os dados do SIM estão disponíveis até 2023 **(sendo estes preliminares)**. Os dados deste painel são atualizados na última sexta feira de cada mês, com a última atualização tendo ocorrido em 31 de maio de 2024. Os dados podem ser acessados em: Herzog, R. S.; Francisco, R. P. V.; Rodrigues, A. S.  Óbitos de gestantes e puérperas [banco de dados], 2022, Observatório Obstétrico Brasileiro (OOBr). Disponível em DOI: https://doi.org/10.7303/syn42902915.
 
 <h3><span style = "font-weight: bold;">Como citar esse painel</span></h3>
 
