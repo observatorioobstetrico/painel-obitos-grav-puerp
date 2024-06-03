@@ -972,7 +972,7 @@ checkboxGroupInput(
 dados_obitos_desconsiderados_ext <- reactive({
   if (!is.null(input$selectExternosONM)) {
     dados_obitos_desconsiderados |>
-      filter(capitulo_cid10 != "XX.  Causas externas de morbidade e mortalidade")
+      filter(capitulo_cid10 != "XX - Causas externas de morbidade e de mortalidade")
   } else
     dados_obitos_desconsiderados_ext <- dados_obitos_desconsiderados
 })
