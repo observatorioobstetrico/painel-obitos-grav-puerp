@@ -16,8 +16,14 @@ df_aux_municipios <- read.csv("R/databases/df_aux_municipios.csv") |>
 
 
 # Baixando os dados do SIM de 1996 a 2022 ---------------------------------
-ano1 <- c(1996, 2002, 2008, 2014, 2020)
-ano2 <- c(2001, 2007, 2013, 2019, 2022)
+ano1 <- c(1996, 2001, 2006, 2010, 2015, 2020)
+ano2 <- c(2000, 2005, 2009, 2014, 2019, 2022)
+
+## Criando data.frames que irão receber os dados de cada base
+df_obitos_maternos_completo <- data.frame()
+df_maternos_garbage_codes_completo <- data.frame()
+df_obitos_maternos_ac_completo <- data.frame()
+df_obitos_desconsiderados_completo <- data.frame()
 
 for (i in 1:length(ano1)) {
   df_sim_aux <- fetch_datasus(
@@ -27,7 +33,7 @@ for (i in 1:length(ano1)) {
   ) |>
     clean_names()
   
-  df_sim <- df_sim_aux |>
+  df_sim_aux2 <- df_sim_aux |>
     mutate_if(is.numeric, as.character) |>
     mutate(
       causabas = ifelse(causabas %in% c("O935", "O937"), "O95", causabas),
@@ -53,24 +59,11 @@ for (i in 1:length(ano1)) {
         racacor == "5" ~ "Indígena",
         is.na(racacor) | racacor == "9" ~ "Ignorado"
       ),
-      escolaridade = ifelse(
-        "esc2010" %in% names(df_sim_aux),
-        case_when(
-          esc2010 == "0" ~ "Sem escolaridade",
-          esc2010 == "1" ~ "Fundamental I",
-          esc2010 == "2" ~ "Fundamental II",
-          esc2010 == "3" ~ "Médio",
-          esc2010 == "4" ~ "Superior incompleto",
-          esc2010 == "5" ~ "Superior completo",
-          is.na(esc2010) | esc2010 == "9" ~ "Ignorado"
-        ),
-        "Ignorado"
-      ),
       est_civil = case_when(
-        estciv == "1" ~ "Solteiro",
-        estciv == "2" ~ "Casado",
-        estciv == "3" ~ "Viúvo",
-        estciv == "4" ~ "Separado Judic./Divorciado",
+        estciv == "1" ~ "Solteira",
+        estciv == "2" ~ "Casada",
+        estciv == "3" ~ "Viúva",
+        estciv == "4" ~ "Separada Judic./Divorciada",
         estciv == "5" ~ "União Estável",
         is.na(estciv) | estciv == "9" ~ "Ignorado"
       ),
@@ -113,20 +106,47 @@ for (i in 1:length(ano1)) {
         (obitograv == "2" & obitopuerp == "3") | (obitograv == "2" & obitopuerp == "9") | (obitograv == "9" & obitopuerp == "3")  ~ "Não na gravidez ou no puerpério",
         obitograv == "9" & obitopuerp == "9" ~ "Não informado ou ignorado",
         (obitograv == "1" & obitopuerp == "1") | (obitograv == "1" & obitopuerp == "2") ~ "Período inconsistente"
-      ),
-      investigacao_cmm = ifelse(
-        "fonteinv" %in% names(df_sim_aux),
-        if_else(
-          fonteinv == "1",
-          true = "Sim", 
-          false = if_else(fonteinv == "9", true = "Sem informação", false = "Não",  missing = "Sem informação"),
-          missing = "Sem informação"
-        ),
-        "Sem informação"
       )
     ) |>
     left_join(df_aux_municipios) |>
     left_join(df_cid10)
+  
+  if (ano1[i] < 2011) {
+    if (ano1[i] < 2006) {
+      df_sim <- df_sim_aux2 |>
+        mutate(escolaridade = "Ignorado", investigacao_cmm = "Sem informação")
+    } else {
+      df_sim <- df_sim_aux2 |>
+        mutate(
+          escolaridade = "Ignorado",
+          investigacao_cmm = if_else(
+            fonteinv == "1",
+            true = "Sim", 
+            false = if_else(fonteinv == "9", true = "Sem informação", false = "Não",  missing = "Sem informação"),
+            missing = "Sem informação"
+          )
+        )
+    }
+  } else {
+    df_sim <- df_sim_aux2 |>
+      mutate(
+        escolaridade = case_when(
+          esc2010 == "0" ~ "Sem escolaridade",
+          esc2010 == "1" ~ "Fundamental I",
+          esc2010 == "2" ~ "Fundamental II",
+          esc2010 == "3" ~ "Médio",
+          esc2010 == "4" ~ "Superior incompleto",
+          esc2010 == "5" ~ "Superior completo",
+          is.na(esc2010) | esc2010 == "9" ~ "Ignorado"
+        ),
+        investigacao_cmm = if_else(
+          fonteinv == "1",
+          true = "Sim", 
+          false = if_else(fonteinv == "9", true = "Sem informação", false = "Não",  missing = "Sem informação"),
+          missing = "Sem informação"
+        )
+      )
+  }
   
   
   ## Para a seção de óbitos maternos oficiais --------------------------------
@@ -214,23 +234,26 @@ for (i in 1:length(ano1)) {
     ungroup() |>
     arrange(codigo)
   
-    
+
+  ## Juntando com os dados dos anos anteriores ------------------------------
+  df_obitos_maternos_completo <- bind_rows(df_obitos_maternos_completo, df_obitos_maternos)
+  df_maternos_garbage_codes_completo <- bind_rows(df_maternos_garbage_codes_completo, df_maternos_garbage_codes)
+  df_obitos_maternos_ac_completo <- bind_rows(df_obitos_maternos_ac_completo, df_obitos_maternos_ac)
+  df_obitos_desconsiderados_completo <- bind_rows(df_obitos_desconsiderados_completo, df_obitos_desconsiderados)
   
-  if (i == 1) {
-    df_obitos_maternos_completo <- df_obitos_maternos
-    df_maternos_garbage_codes_completo <- df_maternos_garbage_codes
-    df_obitos_maternos_ac_completo <- df_obitos_maternos_ac
-    df_obitos_desconsiderados_completo <- df_obitos_desconsiderados
-  } else {
-    df_obitos_maternos_completo <- full_join(df_obitos_maternos, df_obitos_maternos_completo) |> arrange(codigo, ano)
-    df_maternos_garbage_codes_completo <- full_join(df_maternos_garbage_codes, df_maternos_garbage_codes_completo) |> arrange(codigo, ano)
-    df_obitos_maternos_ac_completo <- full_join(df_obitos_maternos_ac, df_obitos_maternos_ac_completo) |> arrange(codigo, ano)
-    df_obitos_desconsiderados_completo <- full_join(df_obitos_desconsiderados, df_obitos_desconsiderados_completo) |> arrange(codigo, ano)
-  }
-  
-  rm(df_sim_aux, df_sim)
+  rm(
+    df_sim_aux, df_sim_aux2, df_sim, df_obitos_maternos, df_maternos_garbage_codes, 
+    df_obitos_maternos_ac, df_obitos_desconsiderados
+  )
+  gc()
 
 }
+
+## Exportando os dados
+write.csv(df_obitos_maternos_completo, "R/databases/obitos_maternos_muni_1996_2022.csv")
+write.csv(df_maternos_garbage_codes_completo, "R/databases/obitos_garbage_code_muni_1996_2022.csv")
+write.csv(df_obitos_maternos_ac_completo, "R/databases/obitos_maternos_estendidos_1996_2022.csv")
+write.csv(df_obitos_desconsiderados_completo, "R/databases/obitos_desconsiderados_muni_1996_2022.csv")
 
 df_obitos_maternos_completo |> filter(ano == 2022) |> pull(obitos) |> sum()
 df_obitos_maternos_completo |> filter(ano == 1996) |> pull(obitos) |> sum()

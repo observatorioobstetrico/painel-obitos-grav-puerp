@@ -151,16 +151,16 @@ params = paste0('{
         "token": "',token,'"
       },
       "sql": {
-        "sql": {"query":" SELECT CODMUNRES, res_codigo_adotado, res_MUNNOME, res_SIGLA_UF, res_REGIAO, COUNT(1)',
+        "sql": {"query":" SELECT CODMUNRES, res_codigo_adotado, res_MUNNOME, res_SIGLA_UF, res_NOME_UF, res_REGIAO, COUNT(1)',
                 ' FROM \\"datasus-sim\\"',
-                ' GROUP BY CODMUNRES, res_codigo_adotado, res_MUNNOME, res_SIGLA_UF, res_REGIAO",
+                ' GROUP BY CODMUNRES, res_codigo_adotado, res_MUNNOME, res_NOME_UF, res_SIGLA_UF, res_REGIAO",
                         "fetch_size": 65000}
       }
     }')
 
 request <- POST(url = endpoint, body = params, encode = "form")
 df_aux_municipios <- convertRequestToDF(request)
-names(df_aux_municipios) <- c("codmunres", "res_codigo_adotado", "municipio", "uf", "regiao", "nascidos")
+names(df_aux_municipios) <- c("codmunres", "res_codigo_adotado", "municipio", "uf", "nome_uf", "regiao", "nascidos")
 
 df_aux_municipios <- df_aux_municipios |>
   select(!nascidos) |>
