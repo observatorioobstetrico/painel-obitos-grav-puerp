@@ -67,23 +67,23 @@ library(gt)
 
 
 #Carregando os arquivos necessários
-dados_obitos_maternos <- read_delim("dados_oobr_obitos_grav_puerp_maternos_oficiais_1996_2023.csv", 
+dados_obitos_maternos <- read_delim("dados_oobr_obitos_grav_puerp_maternos_oficiais_1996_2024.csv", 
                                     delim = ",", escape_double = FALSE, trim_ws = TRUE) |>
   clean_names()
 
-dados_obitos_maternos_estendido <- read_delim("dados_oobr_obitos_grav_puerp_analise_cruzada_1996_2023.csv", 
+dados_obitos_maternos_estendido <- read_delim("dados_oobr_obitos_grav_puerp_analise_cruzada_1996_2024.csv", 
                                     delim = ",", escape_double = FALSE, trim_ws = TRUE) |>
   clean_names()
 
-dados_obitos_desconsiderados <- read_delim("dados_oobr_obitos_grav_puerp_desconsiderados_1996_2023.csv", 
+dados_obitos_desconsiderados <- read_delim("dados_oobr_obitos_grav_puerp_desconsiderados_1996_2024.csv", 
                                            delim = ",", escape_double = FALSE, trim_ws = TRUE) |>
   clean_names()
 
-dados_obitos_por_uf <- read_delim("dados_oobr_obitos_grav_puerp_ufs_1996_2023.csv", 
+dados_obitos_por_uf <- read_delim("dados_oobr_obitos_grav_puerp_ufs_1996_2024.csv", 
                                            delim = ",", escape_double = FALSE, trim_ws = TRUE) |>
   clean_names()
 
-dados_garbage_codes <- read_delim("dados_oobr_obitos_grav_puerp_garbage_codes_1996_2023.csv", 
+dados_garbage_codes <- read_delim("dados_oobr_obitos_grav_puerp_garbage_codes_1996_2024.csv", 
                                            delim = ",", escape_double = FALSE, trim_ws = TRUE) |>
   clean_names()
 
@@ -108,7 +108,7 @@ Sobre
 
 <h3><span style = "font-weight: bold;">O OOBr Óbitos de Gestantes e Puérperas</span></h3>
 
-É um painel de visualização dinâmico com análises acerca da mortalidade de gestantes e puérperas no Brasil, sob a perspectiva de algumas variáveis da base de dados do Sistema de Informações sobre Mortalidade (SIM). As informações consideradas são referentes aos registros de óbitos de mulheres gestantes ou puérperas dos anos de 1996 a 2023 **(sendo os dados de 2023 preliminares)**. 
+É um painel de visualização dinâmico com análises acerca da mortalidade de gestantes e puérperas no Brasil, sob a perspectiva de algumas variáveis da base de dados do Sistema de Informações sobre Mortalidade (SIM). As informações consideradas são referentes aos registros de óbitos de mulheres gestantes ou puérperas dos anos de 1996 a 2024 **(sendo os dados de 2023 e 2024 preliminares)**. 
 
 <h3><span style = "font-weight: bold;">O Observatório Obstétrico Brasileiro (OOBr)</span></h3>
 
@@ -118,7 +118,7 @@ Conta com **pesquisadores** da <a href = https://www.ufes.br target = _blank> Un
 
 <h3><span style = "font-weight: bold;">Os dados</span></h3>
 
-São providos do DATASUS do Ministério da Saúde e formam um grande banco anual composto por todos os registros das declarações de óbitos (o SIM) que está disponível a partir do ano de 1996. Atualmente, os dados do SIM estão disponíveis até 2023 **(sendo estes preliminares)**. Os dados deste painel são atualizados na última sexta feira de cada mês, com a última atualização tendo ocorrido em 28 de junho de 2024. Os dados podem ser acessados em: Herzog, R. S.; Francisco, R. P. V.; Rodrigues, A. S.  Óbitos de gestantes e puérperas [banco de dados], 2022, Observatório Obstétrico Brasileiro (OOBr). Disponível em DOI: https://doi.org/10.7303/syn42902915.
+São providos do DATASUS do Ministério da Saúde e formam um grande banco anual composto por todos os registros das declarações de óbitos (o SIM) que está disponível a partir do ano de 1996. Atualmente, os dados do SIM estão disponíveis até 2024 **(sendo estes e os de 2023 preliminares)**. Os dados deste painel são atualizados na última sexta feira de cada mês, com a última atualização tendo ocorrido em 26 de julho de 2024. Os dados podem ser acessados em: Herzog, R. S.; Francisco, R. P. V.; Rodrigues, A. S.  Óbitos de gestantes e puérperas [banco de dados], 2022, Observatório Obstétrico Brasileiro (OOBr). Disponível em DOI: https://doi.org/10.7303/syn42902915.
 
 <h3><span style = "font-weight: bold;">Como citar esse painel</span></h3>
 
@@ -178,7 +178,7 @@ Inputs {.sidebar data-width=350 style="width: 350px; visibility: visible; top: 7
 ------------------------------------- 
 ```{r input-obitosM}
 hr();h5(span("Óbitos maternos oficiais", style = "font-weight: bold;")); hr()
-p(em("Obs.: os dados de 2023 são preliminares."))
+p(em("Obs.: os dados de 2023 e 2024 são preliminares."))
 
 hr()
 span("Temporalidade e localidade", style = "font-weight: bold; font-size: 17px")
@@ -528,7 +528,7 @@ Inputs {.sidebar data-width=350 style="width: 350px; visibility: visible; top: 7
 ------------------------------------- 
 ```{r input-obitosGC}
 hr();h5(span("Óbitos maternos oficiais preenchidos com garbage codes", style = "font-weight: bold;")); hr()
-p(em("Obs.: os dados de 2023 são preliminares."))
+p(em("Obs.: os dados de 2023 e 2024 são preliminares."))
 
 hr()
 span("Temporalidade e localidade", style = "font-weight: bold; font-size: 17px")
@@ -861,7 +861,7 @@ Inputs {.sidebar data-width=350 style="width: 350px; visibility: visible; top: 7
 ------------------------------------- 
 ```{r input-obitosNM}
 hr(); h5(span("Óbitos de gestantes e puérperas não considerados", style = "font-weight: bold;")); hr()
-p(em("Obs.: os dados de 2023 são preliminares."))
+p(em("Obs.: os dados de 2023 e 2024 são preliminares."))
 
 hr()
 span("Temporalidade e localidade", style = "font-weight: bold; font-size: 17px")
@@ -1192,7 +1192,7 @@ Inputs {.sidebar data-width=350 style="width: 350px; visibility: visible; top: 7
 ------------------------------------- 
 ```{r input-obitosUF}
 hr(); h5(span("Óbitos de gestantes e puérperas por estado", style = "font-weight: bold;")); hr()
-p(em("Obs.: os dados de 2023 são preliminares."))
+p(em("Obs.: os dados de 2023 e 2024 são preliminares."))
 
 numericInput(
   inputId = "selectAnoUF",
@@ -1327,7 +1327,7 @@ Inputs {.sidebar data-width=350 style="width: 350px; visibility: visible; top: 7
 ------------------------------------- 
 ```{r input-analiseCruzada}
 hr(); h5(span("Análise cruzada", style = "font-weight: bold;")); hr()
-p(em("Obs.: os dados de 2023 são preliminares."))
+p(em("Obs.: os dados de 2023 e 2024 são preliminares."))
 
 hr()
 span("Temporalidade e localidade", style = "font-weight: bold; font-size: 17px")
@@ -1661,3 +1661,4 @@ height = "100%", width = "100%"
 
 )
 ```
+
