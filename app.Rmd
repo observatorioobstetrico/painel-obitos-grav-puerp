@@ -64,9 +64,9 @@ library(reactablefmtr)
 library(openxlsx)
 library(gtsummary)
 library(gt)
+library(glue)
 
-
-#Carregando os arquivos necessários
+# Carregando os arquivos necessários
 dados_obitos_maternos <- read_delim("dados_oobr_obitos_grav_puerp_maternos_oficiais_1996_2024.csv", 
                                     delim = ",", escape_double = FALSE, trim_ws = TRUE) |>
   clean_names()
@@ -92,7 +92,7 @@ tabela_aux_municipios <- read_delim("tabela_auxiliar_municipios.csv",
 
 estadosChoices <- sort(unique(tabela_aux_municipios$uf))
 
-#Definindo as configurações globais das tabelas
+# Definindo as configurações globais das tabelas
 options(reactable.theme = reactableTheme(
   borderColor = "#dfe2e5",
   stripedColor = "#e5efff",
@@ -100,6 +100,18 @@ options(reactable.theme = reactableTheme(
   cellPadding = "8px 12px",
   searchInputStyle = list(width = "100%")
 ))
+
+# Obtendo o dia, mês e ano por extenso
+df_meses <- data.frame(
+  num_mes = 1:12,
+  nome_mes = c("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho",
+               "agosto", "setembro", "outubro", "novembro", "dezembro")
+)
+
+data <- Sys.Date()
+data_por_extenso <- glue(
+  "{substr(data, 9, 10)} de {df_meses$nome_mes[which(df_meses$num_mes == as.numeric(substr(data, start = 6, stop = 7)))]} de {substr(data, 1, 4)}"
+)
 ```
 
 Sobre
@@ -118,7 +130,7 @@ Conta com **pesquisadores** da <a href = https://www.ufes.br target = _blank> Un
 
 <h3><span style = "font-weight: bold;">Os dados</span></h3>
 
-São providos do DATASUS do Ministério da Saúde e formam um grande banco anual composto por todos os registros das declarações de óbitos (o SIM) que está disponível a partir do ano de 1996. Atualmente, os dados do SIM estão disponíveis até 2024 **(sendo estes e os de 2023 preliminares)**. Os dados deste painel são atualizados na última sexta feira de cada mês, com a última atualização tendo ocorrido em 26 de julho de 2024. Os dados podem ser acessados em: Herzog, R. S.; Francisco, R. P. V.; Rodrigues, A. S.  Óbitos de gestantes e puérperas [banco de dados], 2022, Observatório Obstétrico Brasileiro (OOBr). Disponível em DOI: https://doi.org/10.7303/syn42902915.
+São providos do DATASUS do Ministério da Saúde e formam um grande banco anual composto por todos os registros das declarações de óbitos (o SIM) que está disponível a partir do ano de 1996. Atualmente, os dados do SIM estão disponíveis até 2024 **(sendo estes e os de 2023 preliminares)**. Os dados deste painel são atualizados na última sexta feira de cada mês, com a última atualização tendo ocorrido em `r data_por_extenso`. Os dados podem ser acessados em: Herzog, R. S.; Francisco, R. P. V.; Rodrigues, A. S.  Óbitos de gestantes e puérperas [banco de dados], 2022, Observatório Obstétrico Brasileiro (OOBr). Disponível em DOI: https://doi.org/10.7303/syn42902915.
 
 <h3><span style = "font-weight: bold;">Como citar esse painel</span></h3>
 
