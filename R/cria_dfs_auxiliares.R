@@ -23,6 +23,31 @@ convertRequestToDF <- function(request){
 
 endpoint <- paste0(url_base,"/","sql_query")
 
+# Obtendo um dataframe com as regiões, UFs e nomes de cada município -----
+df_aux_municipios <- data.frame()
+params = paste0('{
+      "token": {
+        "token": "',token,'"
+      },
+      "sql": {
+        "sql": {"query":" SELECT CODMUNRES, res_codigo_adotado, res_MUNNOME, res_SIGLA_UF, res_NOME_UF, res_REGIAO, COUNT(1)',
+                ' FROM \\"datasus-sim\\"',
+                ' GROUP BY CODMUNRES, res_codigo_adotado, res_MUNNOME, res_NOME_UF, res_SIGLA_UF, res_REGIAO",
+                        "fetch_size": 65000}
+      }
+    }')
+
+request <- POST(url = endpoint, body = params, encode = "form")
+df_aux_municipios <- convertRequestToDF(request)
+names(df_aux_municipios) <- c("codmunres", "res_codigo_adotado", "municipio", "uf", "nome_uf", "regiao", "nascidos")
+
+df_aux_municipios <- df_aux_municipios |>
+  select(!nascidos) |>
+  arrange(codmunres)
+
+## Exportando o arquivo
+write.csv(df_aux_municipios, "R/databases/df_aux_municipios.csv", row.names = FALSE)
+
 # Obtendo um dataframe com o nome dos capítulos e categorias da CID10 -----
 df_capitulos <- read.csv2("R/databases/CID-10-CAPITULOS.CSV") |>
   mutate(
@@ -144,27 +169,4 @@ df_cid10 <- full_join(df_cid10_ms_completo, df_cid10_pcdas |> filter(!(causabas 
 ## Exportando o arquivo
 write.csv(df_cid10, "R/databases/df_cid10.csv", row.names = FALSE)
 
-# Obtendo um dataframe com as regiões, UFs e nomes de cada município -----
-df_aux_municipios <- data.frame()
-params = paste0('{
-      "token": {
-        "token": "',token,'"
-      },
-      "sql": {
-        "sql": {"query":" SELECT CODMUNRES, res_codigo_adotado, res_MUNNOME, res_SIGLA_UF, res_NOME_UF, res_REGIAO, COUNT(1)',
-                ' FROM \\"datasus-sim\\"',
-                ' GROUP BY CODMUNRES, res_codigo_adotado, res_MUNNOME, res_NOME_UF, res_SIGLA_UF, res_REGIAO",
-                        "fetch_size": 65000}
-      }
-    }')
 
-request <- POST(url = endpoint, body = params, encode = "form")
-df_aux_municipios <- convertRequestToDF(request)
-names(df_aux_municipios) <- c("codmunres", "res_codigo_adotado", "municipio", "uf", "nome_uf", "regiao", "nascidos")
-
-df_aux_municipios <- df_aux_municipios |>
-  select(!nascidos) |>
-  arrange(codmunres)
-
-## Exportando o arquivo
-write.csv(df_aux_municipios, "R/databases/df_aux_municipios.csv", row.names = FALSE)
