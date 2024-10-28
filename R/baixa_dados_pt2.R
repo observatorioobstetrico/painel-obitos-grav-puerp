@@ -17,7 +17,7 @@ df_aux_municipios <- read.csv("R/databases/df_aux_municipios.csv") |>
 
 # Baixando os dados preliminares do SIM de 2023 e 2024 ---------------------
 download.file("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/DO23OPEN.csv", "R/databases/DO23OPEN.csv", mode = "wb")
-download.file("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/DO24OPEN+(2).csv", "R/databases/DO24OPEN.csv", mode = "wb")
+download.file("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/DO24OPEN.csv", "R/databases/DO24OPEN.csv", mode = "wb")
 
 ## Lendo os dados preliminares e excluindo os arquivos baixados
 dados_preliminares_2023_aux <- fread("R/databases/DO23OPEN.csv", sep = ";") |> 
