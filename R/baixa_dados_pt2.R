@@ -25,7 +25,14 @@ saveRDS(data_por_extenso, "R/data_por_extenso.RDS")
 
 
 # Lendo dataframes auxiliares (criados em cria_dfs_auxiliares.R) ----------
-df_cid10 <- read.csv("R/databases/df_cid10.csv")
+df_cid10 <- read.csv("R/databases/df_cid10.csv") |>
+  add_row(
+    causabas = "O142", 
+    capitulo_cid10 = "XV - Gravidez, parto e puerpério",
+    grupo_cid10 = "(O10-O16) Edema, proteinúria e transtornos hipertensivos na gravidez, no parto e no puerpério",
+    causabas_categoria = "O14 Hipertensão gestacional (induzida pela gravidez) com proteinúria significativa",
+    causabas_subcategoria = "Síndrome HELLP"
+  ) 
 
 df_aux_municipios <- read.csv("R/databases/df_aux_municipios.csv") |>
   mutate_if(is.numeric, as.character) |>
@@ -55,7 +62,8 @@ dados_preliminares_aux <- full_join(dados_preliminares_2023_aux, dados_prelimina
 dados_preliminares <- dados_preliminares_aux |>
   mutate_if(is.numeric, as.character) |>
   mutate(
-    causabas = ifelse(causabas %in% c("O935", "O937"), "O95", causabas),
+    causabas = ifelse(causabas %in% c("O935", "O937", "O930"), "O95", causabas),
+    causabas = ifelse(causabas %in% c("O251"), "O25", causabas),
     obitograv = ifelse(is.na(obitograv), "9", obitograv),
     obitopuerp = ifelse(is.na(obitopuerp), "9", obitopuerp),
     ano = as.numeric(substr(dtobito, nchar(dtobito) - 3, nchar(dtobito))),
