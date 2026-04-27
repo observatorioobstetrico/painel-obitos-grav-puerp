@@ -32,7 +32,7 @@ df_cid10 <- read.csv("R/databases/df_cid10.csv") |>
     grupo_cid10 = "(O10-O16) Edema, proteinúria e transtornos hipertensivos na gravidez, no parto e no puerpério",
     causabas_categoria = "O14 Hipertensão gestacional (induzida pela gravidez) com proteinúria significativa",
     causabas_subcategoria = "Síndrome HELLP"
-  ) 
+  )
 
 df_aux_municipios <- read.csv("R/databases/df_aux_municipios.csv") |>
   mutate_if(is.numeric, as.character) |>
@@ -61,9 +61,13 @@ file.remove("R/databases/DO25OPEN_csv.zip")
 all(names(dados_preliminares_2023_aux) == names(dados_preliminares_2024_aux))
 all(names(dados_preliminares_2024_aux) == names(dados_preliminares_2025_aux))
 
+names(dados_preliminares_2025_aux)[which(!names(dados_preliminares_2025_aux) %in% names(dados_preliminares_2024_aux))]
+
 ## Juntando os dados preliminares de 2023, 2024 e 2025
 dados_preliminares_aux <- full_join(dados_preliminares_2023_aux, dados_preliminares_2024_aux) |>
-  full_join(dados_preliminares_2025_aux)
+  full_join(
+    dados_preliminares_2025_aux |> select(!c(mat_clas, covid_clas))
+  )
 
 rm(dados_preliminares_2023_aux, dados_preliminares_2024_aux, dados_preliminares_2025_aux)
 
@@ -73,6 +77,14 @@ dados_preliminares <- dados_preliminares_aux |>
   mutate(
     causabas = ifelse(causabas %in% c("O935", "O937", "O930"), "O95", causabas),
     causabas = ifelse(causabas %in% c("O251"), "O25", causabas),
+    causabas = ifelse(causabas %in% c("O432"), "O439", causabas),
+    causabas = ifelse(causabas %in% c("O969", "O960", "O961"), "O96", causabas),
+    causabas = ifelse(causabas %in% c("A090", "A099"), "A09", causabas),
+    causabas = ifelse(causabas %in% c("A972", "A979"), "A980", causabas),
+    causabas = ifelse(causabas %in% c("K358"), "K359", causabas),
+    causabas = ifelse(causabas %in% c("I489", "I483"), "I48", causabas),
+    causabas = ifelse(causabas %in% c("O971", "O979", "O970"), "O97", causabas),
+    causabas = ifelse(causabas %in% c("D686"), "D689", causabas),
     obitograv = ifelse(is.na(obitograv), "9", obitograv),
     obitopuerp = ifelse(is.na(obitopuerp), "9", obitopuerp),
     ano = as.numeric(substr(dtobito, nchar(dtobito) - 3, nchar(dtobito))),
