@@ -39,26 +39,18 @@ df_aux_municipios <- read.csv("R/databases/df_aux_municipios.csv") |>
   clean_names()
 
 
-# Baixando os dados consolidados do SIM de 2023 e 2024 --------------
-download.file("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/DO23OPEN.csv", "R/databases/DO23OPEN.csv", mode = "wb")
-download.file("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/DO24OPEN.csv", "R/databases/DO24OPEN.csv", mode = "wb")
+# Baixando os dados preliminares do SIM de 2025 --------------
+download.file("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/csv/DO25OPEN_csv.zip", "R/databases/DO25OPEN_csv.zip", mode = "wb")
 
-## Lendo os dados consolidados e excluindo os arquivos baixados
-dados_preliminares_2023_aux <- fread("R/databases/DO23OPEN.csv", sep = ";") |> 
+## Lendo os dados preliminares e excluindo os arquivos baixados
+dados_preliminares_2025_aux <- fread("R/databases/DO25OPEN_csv.zip", sep = ";") |> 
   clean_names()
-file.remove("R/databases/DO23OPEN.csv")
+file.remove("R/databases/DO25OPEN_csv.zip")
 
-dados_preliminares_2024_aux <- fread("R/databases/DO24OPEN.csv", sep = ";") |> 
-  clean_names()
-file.remove("R/databases/DO24OPEN.csv")
+## Juntando os dados preliminares
+dados_preliminares_aux <- dados_preliminares_2025_aux |> select(!c(mat_clas, covid_clas))
 
-## Verificando se os nomes das colunas são todos os mesmos
-all(names(dados_preliminares_2023_aux) == names(dados_preliminares_2024_aux))
-
-## Juntando os dados consolidados de 2023 e 2024
-dados_preliminares_aux <- full_join(dados_preliminares_2023_aux, dados_preliminares_2024_aux) 
-
-rm(dados_preliminares_2023_aux, dados_preliminares_2024_aux)
+rm(dados_preliminares_2025_aux)
 
 ## Fazendo as manipulações necessárias ------------------------------------
 dados_preliminares <- dados_preliminares_aux |>
@@ -166,7 +158,7 @@ dados_preliminares <- dados_preliminares_aux |>
 
 # Para a seção de óbitos maternos oficiais --------------------------------
 ## Lendo o arquivo com os óbitos maternos de 1996 a 2022 ------------------
-dados_obitos_maternos_1996_2022 <- read.csv("R/databases/obitos_maternos_muni_1996_2022.csv") |>
+dados_obitos_maternos_1996_2024 <- read.csv("dados_oobr_obitos_grav_puerp_maternos_oficiais_1996_2024.csv") |>
   mutate(codigo = as.character(codigo)) 
 
 ## Filtrando, nos dados preliminares, apenas os óbitos maternos -----------
@@ -197,14 +189,13 @@ df_maternos_preliminares <- dados_preliminares |>
   as.data.frame()
 
 get_dupes(df_maternos_preliminares)
-sum(df_maternos_preliminares$obitos[which(df_maternos_preliminares$ano == 2023)])
-sum(df_maternos_preliminares$obitos[which(df_maternos_preliminares$ano == 2024)])
+sum(df_maternos_preliminares$obitos[which(df_maternos_preliminares$ano == 2025)])
 
 ## Juntando as duas bases -------------------------------------------------
-df_obitos_maternos <- full_join(dados_obitos_maternos_1996_2022, df_maternos_preliminares)
+df_obitos_maternos <- full_join(dados_obitos_maternos_1996_2024, df_maternos_preliminares)
 
 ## Exportando os dados -----------------------------------------------------
-write.table(df_obitos_maternos, 'dados_oobr_obitos_grav_puerp_maternos_oficiais_1996_2024.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_obitos_maternos, 'dados_oobr_obitos_grav_puerp_maternos_oficiais_1996_2025.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
 # Para a seção de garbage codes -------------------------------------------
@@ -212,7 +203,7 @@ write.table(df_obitos_maternos, 'dados_oobr_obitos_grav_puerp_maternos_oficiais_
 df_garbage_codes <- read.csv("R/databases/df_garbage_codes.csv")
 
 # Lendo o arquivo com os garbage codes de 1996 a 2022 ---------------------
-dados_garbage_codes_1996_2022 <- read.csv("R/databases/obitos_garbage_code_muni_1996_2022.csv") |>
+dados_garbage_codes_1996_2024 <- read.csv("dados_oobr_obitos_grav_puerp_garbage_codes_1996_2024.csv") |>
   mutate(codigo = as.character(codigo)) 
 
 ## Filtrando os óbitos maternos preenchidos com garbage codes -------------
@@ -220,15 +211,15 @@ df_maternos_garbage_codes_preliminares <- df_maternos_preliminares |>
   filter(causabas %in% df_garbage_codes$causabas)
 
 ## Juntando as duas bases -------------------------------------------------
-df_maternos_garbage_codes <- full_join(dados_garbage_codes_1996_2022, df_maternos_garbage_codes_preliminares)
+df_maternos_garbage_codes <- full_join(dados_garbage_codes_1996_2024, df_maternos_garbage_codes_preliminares)
 
 ## Exportando os dados -----------------------------------------------------
-write.table(df_maternos_garbage_codes, 'dados_oobr_obitos_grav_puerp_garbage_codes_1996_2024.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_maternos_garbage_codes, 'dados_oobr_obitos_grav_puerp_garbage_codes_1996_2025.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
 # Para a seção de análise cruzada -----------------------------------------
 ## Lendo o arquivo com os óbitos maternos p/ essa seção de 96 a 2022 ------
-dados_ac_1996_2022 <- read.csv("R/databases/obitos_maternos_estendidos_1996_2022.csv") |>
+dados_ac_1996_2024 <- read.csv("dados_oobr_obitos_grav_puerp_analise_cruzada_1996_2024.csv") |>
   mutate(codigo = as.character(codigo))
 
 ## Filtrando, nos dados preliminares, apenas os óbitos maternos -----------
@@ -250,20 +241,19 @@ df_ac_preliminares <- dados_preliminares |>
     obito_em_idade_fertil, investigacao_cmm, capitulo_cid10
   ) 
 
-nrow(df_ac_preliminares[which(df_ac_preliminares$ano == 2023), ])
-nrow(df_ac_preliminares[which(df_ac_preliminares$ano == 2024), ])
+nrow(df_ac_preliminares[which(df_ac_preliminares$ano == 2025), ])
 as.data.frame(df_ac_preliminares)[is.na(as.data.frame(df_ac_preliminares)), ]
 
 ##Juntando as duas bases
-df_obitos_maternos_ac <- full_join(dados_ac_1996_2022, df_ac_preliminares)
+df_obitos_maternos_ac <- full_join(dados_ac_1996_2024, df_ac_preliminares)
 
 ##Exportando os dados 
-write.table(df_obitos_maternos_ac, 'dados_oobr_obitos_grav_puerp_analise_cruzada_1996_2024.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_obitos_maternos_ac, 'dados_oobr_obitos_grav_puerp_analise_cruzada_1996_2025.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
 # Para a seção de óbitos maternos desconsiderados -------------------------
 ## Lendo o arquivo com os óbitos desconsiderados de 1996 a 2022 -----------
-dados_desconsiderados_1996_2022 <- read.csv("R/databases/obitos_desconsiderados_muni_1996_2022.csv") |>
+dados_desconsiderados_1996_2024 <- read.csv("dados_oobr_obitos_grav_puerp_desconsiderados_1996_2024.csv") |>
   mutate(codigo = as.character(codigo)) 
 
 ## Filtrando, nos dados preliminares, apenas pelos óbitos descons. --------
@@ -293,10 +283,10 @@ df_descons_preliminares <- dados_preliminares |>
 df_descons_preliminares[is.na(df_descons_preliminares), ]
 
 ## Juntando as duas bases
-df_obitos_desconsiderados <- full_join(dados_desconsiderados_1996_2022, df_descons_preliminares)
+df_obitos_desconsiderados <- full_join(dados_desconsiderados_1996_2024, df_descons_preliminares)
 
 ## Exportando os dados 
-write.table(df_obitos_desconsiderados, 'dados_oobr_obitos_grav_puerp_desconsiderados_1996_2024.csv', sep = ",", dec = ".", row.names = FALSE)
+write.table(df_obitos_desconsiderados, 'dados_oobr_obitos_grav_puerp_desconsiderados_1996_2025.csv', sep = ",", dec = ".", row.names = FALSE)
 
 
 ## Para a seção de óbitos maternos por UF ----------------------------------
@@ -325,10 +315,5 @@ df_obitos_uf <- full_join(df_obitos_desc_uf, df_obitos_maternos_uf) |>
   mutate(across(starts_with("obitos"), ~ifelse(is.na(.), 0, .)))
 
 ## Exportando os dados
-write.table(df_obitos_uf, 'dados_oobr_obitos_grav_puerp_ufs_1996_2024.csv', sep = ",", dec = ".", row.names = FALSE)
-
-
-
-
-
+write.table(df_obitos_uf, 'dados_oobr_obitos_grav_puerp_ufs_1996_2025.csv', sep = ",", dec = ".", row.names = FALSE)
 
