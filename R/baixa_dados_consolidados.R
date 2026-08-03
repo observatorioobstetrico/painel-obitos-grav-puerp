@@ -6,6 +6,9 @@ library(getPass)
 library(repr)
 library(data.table)
 library(readr)
+library(future)
+library(future.apply)
+library(glue)
 
 # Lendo dataframes auxiliares (criados em cria_dfs_auxiliares.R) ----------
 df_cid10 <- read.csv("R/databases/df_cid10.csv")
@@ -14,29 +17,26 @@ df_aux_municipios <- read.csv("R/databases/df_aux_municipios.csv") |>
   mutate_if(is.numeric, as.character) |>
   clean_names()
 
+df_garbage_codes <- read.csv("R/databases/df_garbage_codes.csv")
 
-# Baixando os dados do SIM de 1996 a 2022 ---------------------------------
-ano1 <- c(1996, 2001, 2006, 2010, 2015, 2020)
-ano2 <- c(2000, 2005, 2009, 2014, 2019, 2022)
 
-## Criando data.frames que irão receber os dados de cada base
-df_obitos_maternos_completo <- data.frame()
-df_maternos_garbage_codes_completo <- data.frame()
-df_obitos_maternos_ac_completo <- data.frame()
-df_obitos_desconsiderados_completo <- data.frame()
+# Baixando os dados do SIM de 1996 a 2024 ---------------------------------
+anos <- 1996:2024
 
-for (i in 1:length(ano1)) {
+## Criando uma função para baixar e processar os dados de cada ano ----------
+processa_ano <- function(ano, df_cid10, df_aux_municipios, df_garbage_codes) {
+
+  ## Baixando os dados do SIM-DO do ano
   df_sim_aux <- fetch_datasus(
-    year_start = ano1[i],
-    year_end = ano2[i],
+    year_start = ano,
+    year_end = ano,
     information_system = "SIM-DO"
   ) |>
     clean_names()
-  
+
   df_sim_aux2 <- df_sim_aux |>
     mutate_if(is.numeric, as.character) |>
     mutate(
-      causabas = ifelse(causabas %in% c("O935", "O937"), "O95", causabas),
       obitograv = ifelse(is.na(obitograv), "9", obitograv),
       obitopuerp = ifelse(is.na(obitopuerp) | obitopuerp %in% c("0", "4", "8"), "9", obitopuerp),
       ano = as.numeric(substr(dtobito, nchar(dtobito) - 3, nchar(dtobito))),
@@ -46,7 +46,7 @@ for (i in 1:length(ano1)) {
           99,
           ifelse(
             as.numeric(idade) >= 400 & as.numeric(idade) <= 499,
-            substr(idade, 2, 3), 
+            substr(idade, 2, 3),
             0
           )
         )
@@ -110,9 +110,9 @@ for (i in 1:length(ano1)) {
     ) |>
     left_join(df_aux_municipios) |>
     left_join(df_cid10)
-  
-  if (ano1[i] < 2011) {
-    if (ano1[i] < 2006) {
+
+  if (ano < 2011) {
+    if (ano < 2006) {
       df_sim <- df_sim_aux2 |>
         mutate(escolaridade = "Ignorado", investigacao_cmm = "Sem informação")
     } else {
@@ -121,7 +121,7 @@ for (i in 1:length(ano1)) {
           escolaridade = "Ignorado",
           investigacao_cmm = if_else(
             fonteinv == "1",
-            true = "Sim", 
+            true = "Sim",
             false = if_else(fonteinv == "9", true = "Sem informação", false = "Não",  missing = "Sem informação"),
             missing = "Sem informação"
           )
@@ -141,14 +141,14 @@ for (i in 1:length(ano1)) {
         ),
         investigacao_cmm = if_else(
           fonteinv == "1",
-          true = "Sim", 
+          true = "Sim",
           false = if_else(fonteinv == "9", true = "Sem informação", false = "Não",  missing = "Sem informação"),
           missing = "Sem informação"
         )
       )
   }
-  
-  
+
+
   ## Para a seção de óbitos maternos oficiais --------------------------------
   ### Filtrando, nos dados do SIM, apenas os óbitos maternos -----------------
   df_obitos_maternos <- df_sim |>
@@ -177,13 +177,10 @@ for (i in 1:length(ano1)) {
     arrange(codigo)
 
   ## Para a seção de garbage codes -------------------------------------------
-  ### Lendo o dataframe que recebe as CIDs consideradas garbage codes --------
-  df_garbage_codes <- read.csv("R/databases/df_garbage_codes.csv")
-  
   ### Filtrando os óbitos maternos preenchidos com garbage codes -------------
   df_maternos_garbage_codes <- df_obitos_maternos |>
     filter(causabas %in% df_garbage_codes$causabas)
-  
+
 
   ## Para a seção de análise cruzada -----------------------------------------
   ### Filtrando, nos dados do SIM, apenas os óbitos maternos -----------------
@@ -200,12 +197,12 @@ for (i in 1:length(ano1)) {
          (causabas == "M830" & obitopuerp != "2"))
     ) |>
     select(
-      codigo = res_codigo_adotado, municipio, uf, regiao, ano, racacor, est_civil, escolaridade, idade, 
+      codigo = res_codigo_adotado, municipio, uf, regiao, ano, racacor, est_civil, escolaridade, idade,
       local_ocorrencia_obito, assistencia_med, necropsia, tipo_de_morte_materna, periodo_do_obito,
       obito_em_idade_fertil, investigacao_cmm, capitulo_cid10
-    ) 
-  
-  
+    )
+
+
   ## Para a seção de óbitos maternos desconsiderados -------------------------
   ### Filtrando, nos dados do SIM, apenas pelos óbitos desconsiderados -------
   df_obitos_desconsiderados <- df_sim |>
@@ -233,38 +230,48 @@ for (i in 1:length(ano1)) {
     summarise(obitos = sum(obitos)) |>
     ungroup() |>
     arrange(codigo)
-  
 
-  ## Juntando com os dados dos anos anteriores ------------------------------
-  df_obitos_maternos_completo <- bind_rows(df_obitos_maternos_completo, df_obitos_maternos)
-  df_maternos_garbage_codes_completo <- bind_rows(df_maternos_garbage_codes_completo, df_maternos_garbage_codes)
-  df_obitos_maternos_ac_completo <- bind_rows(df_obitos_maternos_ac_completo, df_obitos_maternos_ac)
-  df_obitos_desconsiderados_completo <- bind_rows(df_obitos_desconsiderados_completo, df_obitos_desconsiderados)
-  
+
+  message(glue("✅  Ano {ano} concluído"))
+
+  ## Retornando os dados processados do ano -------------------------------
+  resultados <- list(
+    maternos = df_obitos_maternos,
+    garbage = df_maternos_garbage_codes,
+    ac = df_obitos_maternos_ac,
+    desconsiderados = df_obitos_desconsiderados
+  )
+
+  ## Limpando a memória ----------------------------------------------------
   rm(
-    df_sim_aux, df_sim_aux2, df_sim, df_obitos_maternos, df_maternos_garbage_codes, 
+    df_sim_aux, df_sim_aux2, df_sim, df_obitos_maternos, df_maternos_garbage_codes,
     df_obitos_maternos_ac, df_obitos_desconsiderados
   )
   gc()
 
+  resultados
 }
 
+## Baixando os dados de todos os anos em paralelo ---------------------------
+plan(multisession, workers = availableCores() - 1)
+options(future.rng.onMisuse = "ignore")
+
+resultados <- future_lapply(
+  anos,
+  function(ano) processa_ano(ano, df_cid10, df_aux_municipios, df_garbage_codes)
+)
+
+## Consolidando os resultados ----------------------------------------------
+df_obitos_maternos_completo <- rbindlist(lapply(resultados, `[[`, "maternos"))
+df_maternos_garbage_codes_completo <- rbindlist(lapply(resultados, `[[`, "garbage"))
+df_obitos_maternos_ac_completo <- rbindlist(lapply(resultados, `[[`, "ac"))
+df_obitos_desconsiderados_completo <- rbindlist(lapply(resultados, `[[`, "desconsiderados"))
+
 ## Exportando os dados
-write.csv(df_obitos_maternos_completo, "R/databases/obitos_maternos_muni_1996_2022.csv")
-write.csv(df_maternos_garbage_codes_completo, "R/databases/obitos_garbage_code_muni_1996_2022.csv")
-write.csv(df_obitos_maternos_ac_completo, "R/databases/obitos_maternos_estendidos_1996_2022.csv")
-write.csv(df_obitos_desconsiderados_completo, "R/databases/obitos_desconsiderados_muni_1996_2022.csv")
+write.csv(df_obitos_maternos_completo, "R/databases/obitos_maternos_muni_1996_2024.csv")
+write.csv(df_maternos_garbage_codes_completo, "R/databases/obitos_garbage_code_muni_1996_2024.csv")
+write.csv(df_obitos_maternos_ac_completo, "R/databases/obitos_maternos_estendidos_1996_2024.csv")
+write.csv(df_obitos_desconsiderados_completo, "R/databases/obitos_desconsiderados_muni_1996_2024.csv")
 
-df_obitos_maternos_completo |> filter(ano == 2022) |> pull(obitos) |> sum()
+df_obitos_maternos_completo |> filter(ano == 2024) |> pull(obitos) |> sum()
 df_obitos_maternos_completo |> filter(ano == 1996) |> pull(obitos) |> sum()
-
-
-
-
-
-
-
-
-
-
-

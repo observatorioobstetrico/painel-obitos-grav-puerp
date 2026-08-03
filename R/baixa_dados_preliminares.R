@@ -25,14 +25,7 @@ saveRDS(data_por_extenso, "R/data_por_extenso.RDS")
 
 
 # Lendo dataframes auxiliares (criados em cria_dfs_auxiliares.R) ----------
-df_cid10 <- read.csv("R/databases/df_cid10.csv") |>
-  add_row(
-    causabas = "O142", 
-    capitulo_cid10 = "XV - Gravidez, parto e puerpério",
-    grupo_cid10 = "(O10-O16) Edema, proteinúria e transtornos hipertensivos na gravidez, no parto e no puerpério",
-    causabas_categoria = "O14 Hipertensão gestacional (induzida pela gravidez) com proteinúria significativa",
-    causabas_subcategoria = "Síndrome HELLP"
-  )
+df_cid10 <- read.csv("R/databases/df_cid10.csv")
 
 df_aux_municipios <- read.csv("R/databases/df_aux_municipios.csv") |>
   mutate_if(is.numeric, as.character) |>
@@ -40,7 +33,7 @@ df_aux_municipios <- read.csv("R/databases/df_aux_municipios.csv") |>
 
 
 # Baixando os dados preliminares do SIM de 2025 --------------
-download.file("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/csv/DO25OPEN_csv.zip", "R/databases/DO25OPEN_csv.zip", mode = "wb")
+download.file("https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SIM/csv/Mortalidade_Geral_2025_csv.zip", "R/databases/DO25OPEN_csv.zip", mode = "wb")
 
 ## Lendo os dados preliminares e excluindo os arquivos baixados
 dados_preliminares_2025_aux <- fread("R/databases/DO25OPEN_csv.zip", sep = ";") |> 
@@ -56,16 +49,7 @@ rm(dados_preliminares_2025_aux)
 dados_preliminares <- dados_preliminares_aux |>
   mutate_if(is.numeric, as.character) |>
   mutate(
-    causabas = ifelse(causabas %in% c("O935", "O937", "O930"), "O95", causabas),
     causabas = ifelse(causabas %in% c("O251"), "O25", causabas),
-    causabas = ifelse(causabas %in% c("O432"), "O439", causabas),
-    causabas = ifelse(causabas %in% c("O969", "O960", "O961"), "O96", causabas),
-    causabas = ifelse(causabas %in% c("A090", "A099"), "A09", causabas),
-    causabas = ifelse(causabas %in% c("A972", "A979"), "A980", causabas),
-    causabas = ifelse(causabas %in% c("K358"), "K359", causabas),
-    causabas = ifelse(causabas %in% c("I489", "I483"), "I48", causabas),
-    causabas = ifelse(causabas %in% c("O971", "O979", "O970"), "O97", causabas),
-    causabas = ifelse(causabas %in% c("D686"), "D689", causabas),
     obitograv = ifelse(is.na(obitograv), "9", obitograv),
     obitopuerp = ifelse(is.na(obitopuerp), "9", obitopuerp),
     ano = as.numeric(substr(dtobito, nchar(dtobito) - 3, nchar(dtobito))),
@@ -157,8 +141,8 @@ dados_preliminares <- dados_preliminares_aux |>
 
 
 # Para a seção de óbitos maternos oficiais --------------------------------
-## Lendo o arquivo com os óbitos maternos de 1996 a 2022 ------------------
-dados_obitos_maternos_1996_2024 <- read.csv("dados_oobr_obitos_grav_puerp_maternos_oficiais_1996_2024.csv") |>
+## Lendo o arquivo com os óbitos maternos de 1996 a 2024 ------------------
+dados_obitos_maternos_1996_2024 <- read.csv("R/databases/obitos_maternos_muni_1996_2024.csv") |>
   mutate(codigo = as.character(codigo)) 
 
 ## Filtrando, nos dados preliminares, apenas os óbitos maternos -----------
@@ -203,7 +187,7 @@ write.table(df_obitos_maternos, 'dados_oobr_obitos_grav_puerp_maternos_oficiais_
 df_garbage_codes <- read.csv("R/databases/df_garbage_codes.csv")
 
 # Lendo o arquivo com os garbage codes de 1996 a 2022 ---------------------
-dados_garbage_codes_1996_2024 <- read.csv("dados_oobr_obitos_grav_puerp_garbage_codes_1996_2024.csv") |>
+dados_garbage_codes_1996_2024 <- read.csv("R/databases/obitos_garbage_code_muni_1996_2024.csv") |>
   mutate(codigo = as.character(codigo)) 
 
 ## Filtrando os óbitos maternos preenchidos com garbage codes -------------
@@ -218,8 +202,8 @@ write.table(df_maternos_garbage_codes, 'dados_oobr_obitos_grav_puerp_garbage_cod
 
 
 # Para a seção de análise cruzada -----------------------------------------
-## Lendo o arquivo com os óbitos maternos p/ essa seção de 96 a 2022 ------
-dados_ac_1996_2024 <- read.csv("dados_oobr_obitos_grav_puerp_analise_cruzada_1996_2024.csv") |>
+## Lendo o arquivo com os óbitos maternos p/ essa seção de 96 a 2024 ------
+dados_ac_1996_2024 <- read.csv("R/databases/obitos_maternos_estendidos_1996_2024.csv") |>
   mutate(codigo = as.character(codigo))
 
 ## Filtrando, nos dados preliminares, apenas os óbitos maternos -----------
@@ -252,8 +236,8 @@ write.table(df_obitos_maternos_ac, 'dados_oobr_obitos_grav_puerp_analise_cruzada
 
 
 # Para a seção de óbitos maternos desconsiderados -------------------------
-## Lendo o arquivo com os óbitos desconsiderados de 1996 a 2022 -----------
-dados_desconsiderados_1996_2024 <- read.csv("dados_oobr_obitos_grav_puerp_desconsiderados_1996_2024.csv") |>
+## Lendo o arquivo com os óbitos desconsiderados de 1996 a 2024 -----------
+dados_desconsiderados_1996_2024 <- read.csv("R/databases/obitos_desconsiderados_muni_1996_2024.csv") |>
   mutate(codigo = as.character(codigo)) 
 
 ## Filtrando, nos dados preliminares, apenas pelos óbitos descons. --------
